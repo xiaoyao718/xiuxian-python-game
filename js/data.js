@@ -596,5 +596,903 @@ window.GAME_DATA = {
         { who: "旁白", text: "——第一卷 · 完。愿少年终有一日，让天下人谈起他的名字时，脸上有光。" }
       ]
     }
-  ]
+  ],
+
+  // ============================================================
+  // 灵宠系统（i2-3 S5）：按语法主题孵化，以练促养、越养越难。
+  // icon 为内联简笔 SVG（viewBox 0 0 96 96，单色线稿 + currentColor），
+  // 渲染时用 hue 设色；glyph 是行囊面板里的单字印章字。
+  // ============================================================
+  pets: [
+    {
+      id: "pet_qin",
+      name: "传声灵雀",
+      topic: "print 与注释",
+      glyph: "雀",
+      hue: "#c8a44b",
+      stages: ["灵卵", "幼雀", "传声灵雀"],
+      desc: "把你说过的话，学给天地听。",
+      get: "lv1",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 58c0-16 11-28 28-28s28 12 28 28c0 10-5 18-13 22H33c-8-4-13-12-13-22z"/><path d="M45 31c-9-2-14-9-16-16 6 1 11 4 14 8"/><path d="M41 80c5 3 9 3 14 0"/><path d="M52 50c5 0 9 4 9 9"/><circle cx="43" cy="47" r="2.4" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      id: "pet_shu",
+      name: "藏灵玉鼠",
+      topic: "变量与类型",
+      glyph: "鼠",
+      hue: "#8fd3c4",
+      stages: ["灵卵", "玉鼠", "藏灵玉鼠"],
+      desc: "替你把灵气收进名字里。",
+      get: "lv2",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="48" cy="58" rx="26" ry="24"/><path d="M24 62V34c0-8 6-14 14-14 8 0 14 6 14 14"/><path d="M72 62V34c0-8-6-14-14-14-8 0-14 6-14 14"/><circle cx="31" cy="29" r="2.6" fill="currentColor" stroke="none"/><circle cx="65" cy="29" r="2.6" fill="currentColor" stroke="none"/><path d="M42 62c0 5 12 5 12 0"/><path d="M70 82c7-2 8-7 8-11"/><circle cx="43" cy="66" r="1.8" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      id: "pet_hu",
+      name: "谛听灵狐",
+      topic: "input 与类型转换",
+      glyph: "狐",
+      hue: "#d9a05b",
+      stages: ["灵卵", "灵狐", "谛听灵狐"],
+      desc: "世间话，听进耳里才作数。",
+      get: "lv3",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 40c10-18 38-18 48 0 7 11 4 24-8 32H32c-12-8-15-21-8-32z"/><path d="M31 30L24 16l14 8"/><path d="M65 30l7-14-14 8"/><circle cx="40" cy="48" r="2.5" fill="currentColor" stroke="none"/><circle cx="56" cy="48" r="2.5" fill="currentColor" stroke="none"/><path d="M46 55c0 4 4 4 4 0"/><path d="M52 84c14-4 22-16 20-30"/></svg>'
+    },
+    {
+      id: "pet_gui",
+      name: "阴阳玄龟",
+      topic: "if 条件判断",
+      glyph: "龟",
+      hue: "#7fa86a",
+      stages: ["灵卵", "玄龟", "阴阳玄龟"],
+      desc: "一阴一阳，择路而行。",
+      get: "lv4",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M48 22c18 0 28 12 28 28 0 16-13 26-28 26s-28-10-28-26c0-16 10-28 28-28z"/><path d="M48 30v38"/><path d="M32 34c8 6 24 6 32 0"/><path d="M30 56c9-7 27-7 36 0"/><path d="M38 76l-8 14"/><path d="M58 76l8 14"/><circle cx="48" cy="46" r="2.4" fill="currentColor" stroke="none"/></svg>'
+    },
+    {
+      id: "pet_lang",
+      name: "追风灵狼",
+      topic: "for 循环",
+      glyph: "狼",
+      hue: "#9aa7b8",
+      stages: ["灵卵", "灵狼", "追风灵狼"],
+      desc: "一遍一遍，直到踏平谷口。",
+      get: "lv5",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 52c10-14 42-14 52 0 5 10-2 22-14 26H36C24 74 17 62 22 52z"/><path d="M28 36l-2 12 10-2"/><path d="M68 36l2 12-10-2"/><circle cx="40" cy="50" r="2.5" fill="currentColor" stroke="none"/><circle cx="56" cy="50" r="2.5" fill="currentColor" stroke="none"/><path d="M46 58c0 4 4 4 4 0"/><path d="M70 74c8-2 10-9 9-16"/></svg>'
+    },
+    {
+      id: "pet_jiao",
+      name: "雷纹幼蛟",
+      topic: "筑基天劫（综合）",
+      glyph: "蛟",
+      hue: "#a58fd0",
+      stages: ["灵卵", "幼蛟", "雷纹幼蛟"],
+      desc: "天雷洗过，方有腾云之日。",
+      get: "boss",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 76c18-8 12-24 26-30 12-5 16 5 26-2 8-6 8-16 4-22"/><circle cx="60" cy="24" r="7"/><path d="M60 17l-3-6M60 17l5-5"/><circle cx="58" cy="23" r="2" fill="currentColor" stroke="none"/><path d="M20 84c10-2 16-6 20-12"/><path d="M62 26l6 4"/></svg>'
+    }
+  ],
+
+  // 灵器图鉴（i2-3 S6）：随章节通关获得，只收集不消费
+  artifacts: [
+    {
+      id: "art_xd",
+      name: "残页仙典",
+      kind: "本命法器",
+      glyph: "典",
+      from: "lv1",
+      desc: "林慕识海中那一页凡人之书，Python 仙典本体。",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 20h40v56H30c-4 0-7-3-7-7V22c0-1 1-2 2-2h-1z" transform="translate(0 0)"/><path d="M64 24h6c2 0 4 2 4 4v42c0 5-4 8-8 8H26"/><path d="M33 34h22M33 44h22M33 54h14"/><path d="M74 30h-6v18"/><path d="M71 40h6"/></svg>'
+    },
+    {
+      id: "art_pen",
+      name: "分纹笔",
+      kind: "灵笔",
+      glyph: "笔",
+      from: "lv2",
+      desc: "抄了三年废纹的笔，如今写自己的路。",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 78L44 30l22 22z" transform="translate(0 0)"/><path d="M70 18l8 8-26 26-10 8c-8-6-14-12-18-20l8-10z"/><path d="M70 18l8 8"/><path d="M22 78l-6 14 18-4"/><path d="M50 48l-6 6"/></svg>'
+    },
+    {
+      id: "art_ling",
+      name: "测纹令",
+      kind: "令牌",
+      glyph: "令",
+      from: "lv3",
+      desc: "丙等测纹令。令牌会旧，修为不会。",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="26" y="14" width="44" height="68" rx="7"/><circle cx="48" cy="42" r="10"/><path d="M36 66h24"/><path d="M42 30h12"/><path d="M48 32v20"/></svg>'
+    },
+    {
+      id: "art_jia",
+      name: "玄龟甲片",
+      kind: "护符",
+      glyph: "甲",
+      from: "lv4",
+      desc: "分纹台下拾得的一片龟甲，遇险自鸣。",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M48 16L80 32v32L48 80 16 64V32z"/><path d="M48 16v64M16 32l64 32M80 32L16 64"/><circle cx="48" cy="48" r="7"/></svg>'
+    },
+    {
+      id: "art_zhui",
+      name: "追风铃",
+      kind: "法器",
+      glyph: "铃",
+      from: "lv5",
+      desc: "夜枭谷一战缴获，风过铃响如狼嚎。",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 34c0-12 8-20 18-20s18 8 18 20c0 18 8 24 8 34H22c0-10 8-16 8-34z"/><circle cx="48" cy="24" r="2.5" fill="currentColor" stroke="none"/><path d="M48 58l-8 10"/><path d="M48 58l8 10"/><path d="M40 68h16"/></svg>'
+    },
+    {
+      id: "art_bei",
+      name: "抗雷碑拓",
+      kind: "拓本",
+      glyph: "碑",
+      from: "boss",
+      desc: "渡劫石碑的拓片，字里还残留雷意。",
+      icon: '<svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M34 14h28v62l-14 10-14-10z"/><path d="M48 34v-6M42 40h12l-8 12h10"/><path d="M34 66h28"/><path d="M34 74h28"/></svg>'
+    }
+  ],
+
+  // 灵宠分阶练习题库（i2-3 S5）：petQuests = { petId: [入门, 进阶, 登峰] }
+  // 难度阶梯：入门=章节知识直接应用；进阶=易错点与小坑；
+  // 登峰=综合 / 找错 / 多步预测。题型复用主线 schema（选择题 / kind:"fill" 补全题）。
+  petQuests: {
+    // ---------------- 传声灵雀 · print 与注释 ----------------
+    pet_qin: [
+      // 入门
+      [
+        {
+          q: "在 PyCharm 里运行 print(\"你好，北辰宗\")，屏幕会显示什么？",
+          options: ["你好，北辰宗", "\"你好，北辰宗\"（连引号）", "什么也不显示", "报错：北辰宗未定义"],
+          answer: 0,
+          hint: "引号是文字的边界，输出时它自己会出现吗？",
+          explain: "print 输出的是一对引号中间的文字，引号本身不会出现。",
+          cheer: "一声招呼打出去，灵雀记住了这句话。"
+        },
+        {
+          q: "林慕想把「我回来了」这行字写给天地听，请补全法诀：",
+          kind: "fill",
+          code: "print(__1__)",
+          slots: [["\"我回来了\"", "我回来了"]],
+          answer: [0],
+          hint: "要输出文字，文字得包在引号里。",
+          explain: "print(\"我回来了\") 输出：我回来了。",
+          cheer: "灵雀衔着这句话，飞进了夜色里。"
+        },
+        {
+          q: "print(6 * 7) 会输出什么？",
+          options: ["67", "42", "6 * 7", "报错：* 不能用于数字"],
+          answer: 1,
+          hint: "数字不加引号，Python 会真的把它算出来。",
+          explain: "6 * 7 = 42，所以输出 42。",
+          cheer: "六乘七是四十二——灵雀替你验过了。"
+        },
+        {
+          q: "print(\"林慕\", \"周显\") 会输出什么？",
+          options: ["林慕 周显", "林慕周显", "\"林慕\", \"周显\"", "林慕，周显"],
+          answer: 0,
+          hint: "print 的逗号会变成什么？",
+          explain: "逗号隔开的多项内容输出时自动加空格：林慕 周显。",
+          cheer: "名字之间隔着一口气，谁也没丢。"
+        }
+      ],
+      // 进阶
+      [
+        {
+          q: "想让输出变成「第3剑」（数字与文字之间没有空格），下面哪段能跑出正确结果？",
+          kind: "fill",
+          code: "print(\"第\" + __1__ + \"剑\")",
+          slots: [["str(3)", "3", "\"3\"", "int(3)"]],
+          answer: [0],
+          hint: "字符串和整数不能直接相加，数字要先变成什么？",
+          explain: "3 是整数，不能直接与字符串相加；str(3) 把它变成 \"3\" 才能拼接。",
+          cheer: "灵雀的喉咙只有一条：说得对，才飞得远。"
+        },
+        {
+          q: "print(\"3\" + \"4\") 会输出什么？",
+          options: ["7", "34", "\"34\"（带引号）", "报错：字符串不能相加"],
+          answer: 1,
+          hint: "两个带引号的数字相加，是算数还是并排？",
+          explain: "两边都是字符串，+ 是拼接：\"3\" + \"4\" = \"34\"。",
+          cheer: "带引号的不是修为，是名字——名字只能并排念。"
+        },
+        {
+          q: "运行 print(3, \"+\", 4)，屏幕输出什么？",
+          options: ["3 + 4", "3+4", "7", "34"],
+          answer: 0,
+          hint: "注意 print 逗号会自动加空格，中间那个 \"+\" 是带引号的文字。",
+          explain: "三项之间各有一个空格：3 + 4。这不是运算，是照原文念出来。",
+          cheer: "法诀不会擅自替你做主——没加引号不算，加了引号只念。"
+        },
+        {
+          q: "print(10 / 2) 会输出什么？",
+          options: ["5", "5.0", "10/2", "报错：除法结果不是整数"],
+          answer: 1,
+          hint: "Python 里除法得到的数，会不会带小数点？",
+          explain: "Python 3 中 / 是真正除法，10 / 2 得到小数 5.0。",
+          cheer: "灵雀轻声纠正：除出来的，多半带着小数尾巴。"
+        }
+      ],
+      // 登峰
+      [
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "a = \"慕\"\nprint(a * 3)",
+          options: ["慕慕慕", "3 慕", "慕 3", "报错：字符串不能乘整数"],
+          answer: 0,
+          hint: "字符串乘以整数，会把字符串重复几遍？",
+          explain: "\"慕\" * 3 把字符串重复 3 遍：慕慕慕。",
+          cheer: "一句话重复三遍，就是三句回响。"
+        },
+        {
+          q: "林慕想输出「林慕18」（连在一起），下面哪一段会报错？",
+          options: [
+            "print(\"林慕\" + \"18\")",
+            "print(\"林慕\" + 18)",
+            "print(\"林慕18\")",
+            "print(\"林慕\", 18)"
+          ],
+          answer: 1,
+          hint: "字符串能直接加整数吗？",
+          explain: "\"林慕\" 是字符串，18 是整数，两者不能直接相加——要先 str(18)。",
+          cheer: "找错比写对更见功夫，灵雀为你叫好。"
+        },
+        {
+          q: "想让输出变成「7岁」，请补全：",
+          kind: "fill",
+          code: "n = 7\nprint(__1__ + \"岁\")",
+          slots: [["str(n)", "n", "\"n\"", "int(n)"]],
+          answer: [0],
+          hint: "n 是整数 7，字符串只能和字符串拼接。",
+          explain: "str(n) 把 7 变成 \"7\"，再拼接 \"岁\" 得 7岁。",
+          cheer: "年纪七岁，声音要传到七岁那一边。"
+        },
+        {
+          q: "print(1, \"1\") 会输出什么？",
+          options: ["1 1", "11", "2", "报错：1 和 \"1\" 类型不同"],
+          answer: 0,
+          hint: "一个是整数 1，一个是字符串 \"1\"，print 会用空格隔开输出。",
+          explain: "print 多项用空格分隔：先是数字 1，再是文字 1，得到 1 1。",
+          cheer: "同是「一」，一个是修为，一个是名字——灵雀分得清。"
+        }
+      ]
+    ],
+
+    // ---------------- 藏灵玉鼠 · 变量与类型 ----------------
+    pet_shu: [
+      // 入门
+      [
+        {
+          q: "在 Python 里，变量最像什么？",
+          options: [
+            "带名字的容器，能装灵力（数据）",
+            "一条固定不变的天道法诀",
+            "只能存文字的符纸",
+            "一次性的墨块"
+          ],
+          answer: 0,
+          hint: "power = 3 之后，喊 power 能取出什么？",
+          explain: "变量 = 带名字的容器，往里放数据，喊名字就能取出来。",
+          cheer: "玉鼠最会藏东西——名字一对，宝贝就出来了。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "qi = 2.5\nprint(qi)",
+          options: ["2.5", "\"qi\"", "qi", "报错：qi 没加引号"],
+          answer: 0,
+          hint: "print(qi) 里 qi 是变量，输出的是它装的值。",
+          explain: "变量 qi 里装着小数 2.5，print(qi) 输出 2.5。",
+          cheer: "玉鼠把灵气藏好，喊一声就双手奉上。"
+        },
+        {
+          q: "下列哪个变量名不合法？",
+          options: ["my_qi", "9zhou", "_qi", "level_1"],
+          answer: 1,
+          hint: "变量名能不能以数字开头？",
+          explain: "9zhou 以数字开头，Python 会把它当成数字的一部分，不合法。",
+          cheer: "玉鼠认得名字的规矩：数字不能当名头。"
+        },
+        {
+          q: "想让 power 装进整数 3，请补全：",
+          kind: "fill",
+          code: "power = __1__\nprint(power)",
+          slots: [["3", "\"3\"", "power"]],
+          answer: [0],
+          hint: "要输出 3 且让它是整数，3 要不要加引号？",
+          explain: "power = 3 存的是整数；加引号 \"3\" 会变成字符串。",
+          cheer: "整数归整数，文字归文字——玉鼠分毫不乱。"
+        }
+      ],
+      // 进阶
+      [
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "name = \"慕\"\nname = \"林慕\"\nprint(name)",
+          options: ["林慕", "慕", "慕 林慕", "报错：变量不能改名"],
+          answer: 0,
+          hint: "同一个名字被重新赋值后，里面装的是哪一次的值？",
+          explain: "变量可以被重新赋值，后写的值会盖住先写的：最终是 林慕。",
+          cheer: "名字可以重起，装进去的永远是最后一笔灵力。"
+        },
+        {
+          q: "print(2 + 3.0) 会输出什么？",
+          options: ["5", "5.0", "23.0", "报错：整数加不了小数"],
+          answer: 1,
+          hint: "整数和小数相加，结果会保留什么？",
+          explain: "int 与 float 相加，结果自动变成 float：5.0。",
+          cheer: "玉鼠会算总账：灵砂碎银，合在一起都是小数。"
+        },
+        {
+          q: "下面哪一段会报错？",
+          options: [
+            "age = 18\nprint(age)",
+            "Age = 18\nprint(age)",
+            "age_1 = 18\nprint(age_1)",
+            "_age = 18\nprint(_age)"
+          ],
+          answer: 1,
+          hint: "Python 区分大小写吗？Age 和 age 是同一个变量吗？",
+          explain: "Age 与 age 是两个不同的变量；只定义了 Age 却打印 age，会 NameError。",
+          cheer: "玉鼠的耳朵很灵：大写的名和小写的名，不是一家。"
+        },
+        {
+          q: "想让输出是「林慕18」（连在一起），请补全：",
+          kind: "fill",
+          code: "a = \"林慕\"\nb = __1__\nprint(a + b)",
+          slots: [["\"18\"", "18", "18.0", "int(18)"]],
+          answer: [0],
+          hint: "字符串只能与字符串拼接，18 得先变成带引号的文字。",
+          explain: "b = \"18\" 时 a + b 是字符串拼接：林慕18。",
+          cheer: "名字配着号令念，玉鼠一次记牢。"
+        }
+      ],
+      // 登峰
+      [
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "x = 1\ny = x\nx = 2\nprint(x, y)",
+          options: ["2 1", "1 2", "2 2", "1 1"],
+          answer: 0,
+          hint: "y = x 发生时 x 是多少？之后 x 再变，y 会跟着变吗？",
+          explain: "y = x 时 x 还是 1，所以 y = 1；之后 x 改成 2，y 仍是 1。",
+          cheer: "玉鼠捧走的是一瞬间的灵力，之后你改多少都与它无关。"
+        },
+        {
+          q: "想把字符串 \"5\" 变成整数再 +1 输出 6，请补全：",
+          kind: "fill",
+          code: "qi = \"5\"\nnum = int(__1__)\nprint(num + 1)",
+          slots: [["qi", "\"5\"", "5", "\"num\""]],
+          answer: [0],
+          hint: "要转换的是变量名还是字符串本身？int() 括号里该写谁？",
+          explain: "int(qi) 把变量 qi 里的 \"5\" 转成 5，再加 1 输出 6。",
+          cheer: "凡铁入炉、灵铁出炉——玉鼠递进 int() 的正好是那只变量。"
+        },
+        {
+          q: "运行下面的代码，会发生什么？",
+          code: "print(name)",
+          options: ["输出 name", "报错：name 未定义", "输出空行", "输出 \"name\""],
+          answer: 1,
+          hint: "name 还没有被赋值过，能打印它吗？",
+          explain: "name 从未赋值，Python 找不到这个名字，抛出 NameError。",
+          cheer: "玉鼠只认见过的名字——没存过的东西，它给不出来。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "a = 3\na = 3.5\na = \"三\"\nprint(a)",
+          options: ["三", "3.5", "3", "报错：变量类型不能变"],
+          answer: 0,
+          hint: "变量可以反复赋值，最后一次装的是什么？",
+          explain: "变量类型可以变化，a 最终装的是字符串 \"三\"。",
+          cheer: "同是「三」，从整数到小数再到名字——玉鼠照单全收。"
+        }
+      ]
+    ],
+
+    // ---------------- 谛听灵狐 · input 与类型转换 ----------------
+    pet_hu: [
+      // 入门
+      [
+        {
+          q: "name = input(\"名字：\")，玩家输入 林慕，name 里存的是什么类型？",
+          options: ["字符串 str", "整数 int", "小数 float", "空值 None"],
+          answer: 0,
+          hint: "input 有一条铁律：拿回来的永远是什么？",
+          explain: "input 返回的永远是字符串 str，哪怕你输入的是数字。",
+          cheer: "灵狐竖起耳朵：听进来的，一律当话记。"
+        },
+        {
+          q: "input(\"你的名字：\") 括号里的「你的名字：」起什么作用？",
+          options: [
+            "作为提示文字先显示，等待玩家输入",
+            "规定玩家必须输入中文",
+            "自动把输入存成名字",
+            "没有作用，可以省略括号里的内容"
+          ],
+          answer: 0,
+          hint: "运行到 input 时屏幕会先出现什么？",
+          explain: "括号里的字符串是提示语，显示后程序停下来等玩家输入。",
+          cheer: "灵狐问话前先打招呼——有提示，才有人应。"
+        },
+        {
+          q: "想让输入的数字参与加法，请补全：",
+          kind: "fill",
+          code: "age = int(input(\"年龄：\"))\nprint(age + __1__)",
+          slots: [["1", "\"1\"", "int(1)", "input"]],
+          answer: [0],
+          hint: "age 已经是整数，加几岁就是几？",
+          explain: "age 已被 int() 转成整数，age + 1 正常相加。",
+          cheer: "一岁一岁往上数，灵狐记得清清楚楚。"
+        },
+        {
+          q: "玩家输入 3.5，你用 int(input(\"数值：\")) 接收，会发生什么？",
+          options: ["得到 3", "得到 3.5", "报错：int() 不能把 \"3.5\" 变成整数", "得到 \"3.5\""],
+          answer: 2,
+          hint: "int(\"3.5\") 能把带小数点的文字直接变成整数吗？",
+          explain: "int(\"3.5\") 无法处理小数点，抛出 ValueError；要小数应先用 float()。",
+          cheer: "灵狐摇头：带小数的文字，不能硬塞进 int 的炉子。"
+        }
+      ],
+      // 进阶
+      [
+        {
+          q: "age = input(\"年龄：\")，玩家输入 18，接下来哪行能正常算出明年年龄？",
+          options: [
+            "print(age + 1)",
+            "print(int(age) + 1)",
+            "print(age + \"1\")",
+            "print(str(age) + 1)"
+          ],
+          answer: 1,
+          hint: "age 是字符串 \"18\"，要算数得先做什么？",
+          explain: "int(age) 把 \"18\" 变成 18，再 +1 得 19。",
+          cheer: "灵狐教你把听到的话翻译成修为——int() 就是那道口译。"
+        },
+        {
+          q: "想把输入的数字转成整数后加 1，请补全：",
+          kind: "fill",
+          code: "age = input(\"年龄：\")\nage = int(__1__)\nprint(age + 1)",
+          slots: [["age", "\"18\"", "input", "18"]],
+          answer: [0],
+          hint: "int() 里要写的是存着输入内容的那个名字。",
+          explain: "age 先装着 \"18\"，int(age) 转成整数再赋值回 age。",
+          cheer: "同一只变量，先当话听，再当数算——灵狐两步走。"
+        },
+        {
+          q: "运行 int(\"3.5\") 会发生什么？",
+          options: ["得到 3", "得到 3.5", "报错 ValueError", "得到 \"3.5\""],
+          answer: 2,
+          hint: "带小数点的文字能直接 int 吗？",
+          explain: "int 只能处理整数字符串，\"3.5\" 会抛 ValueError。",
+          cheer: "灵狐一眼识破：这不是整数该进的门。"
+        },
+        {
+          q: "print(\"5\" + str(5)) 会输出什么？",
+          options: ["55", "10", "5 5", "报错：str(5) 不能拼接"],
+          answer: 0,
+          hint: "str(5) 把整数变成字符串 \"5\"，两个字符串相加是？",
+          explain: "\"5\" + \"5\" 拼接成 \"55\"。",
+          cheer: "一个名字一个号，并排念才是 55。"
+        }
+      ],
+      // 登峰
+      [
+        {
+          q: "运行下面的代码，玩家输入 慕，输出什么？",
+          code: "s = input(\"字：\")\nprint(s * 2)",
+          options: ["慕慕", "慕 2", "2 慕", "报错：字符串不能乘整数"],
+          answer: 0,
+          hint: "字符串乘整数 n，会重复几次？",
+          explain: "s 装的是 \"慕\"，\"慕\" * 2 = 慕慕。",
+          cheer: "一个字听两遍，灵狐就记住了整句。"
+        },
+        {
+          q: "运行下面的代码，玩家先输入 林慕 回车，再输入 18 回车，屏幕输出什么？",
+          code: "name = input(\"名字：\")\nprint(\"你好，\" + name)\nage = int(input(\"年龄：\"))\nprint(\"明年你\", age + 1, \"岁\")",
+          options: [
+            "你好，林慕 和 明年你 19 岁 两行",
+            "你好，林慕 和 明年你 181 岁 两行",
+            "只有 你好，林慕 一行",
+            "报错：字符串不能加数字"
+          ],
+          answer: 0,
+          hint: "name 是字符串可直接拼接；age 经 int() 后是整数。",
+          explain: "第一行拼接输出 你好，林慕；int(\"18\") 得 18，age+1=19，第二行输出 明年你 19 岁。",
+          cheer: "听进去、转过来、算出来——灵狐一气呵成。"
+        },
+        {
+          q: "玩家在「分数」处输入 九十分，运行 int(input(\"分数：\"))，会发生什么？",
+          options: [
+            "得到 90",
+            "报错：int() 认不出中文数字",
+            "得到 \"九十分\"",
+            "自动把九十分换算成 90"
+          ],
+          answer: 1,
+          hint: "int() 只认形如 \"18\" 的数字文字，中文数字它认得吗？",
+          explain: "int(\"九十分\") 无法解析，抛出 ValueError。",
+          cheer: "灵狐诚实得很：听不懂的话，它不会假装听懂。"
+        },
+        {
+          q: "运行 int(float(\"3.5\")) 会得到什么？",
+          options: ["3", "3.5", "4", "报错：float 之后不能再 int"],
+          answer: 0,
+          hint: "float(\"3.5\") 先得到 3.5；int() 对小数会怎么处理？",
+          explain: "float(\"3.5\") = 3.5，int(3.5) 直接截去小数部分得 3。",
+          cheer: "两次转炉，灵狐看着小数点被关在门外。"
+        }
+      ]
+    ],
+
+    // ---------------- 阴阳玄龟 · if 条件判断 ----------------
+    pet_gui: [
+      // 入门
+      [
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "score = 85\nif score >= 90:\n    print(\"天才\")\nelse:\n    print(\"继续修行\")",
+          options: ["继续修行", "天才", "两行都输出", "报错：score 没定义"],
+          answer: 0,
+          hint: "85 满足 >= 90 吗？",
+          explain: "85 < 90，走 else 分支，输出 继续修行。",
+          cheer: "玄龟不慌不忙：差五分，就是差五分。"
+        },
+        {
+          q: "print(5 == 5) 会输出什么？",
+          options: ["True", "False", "5", "报错：== 只能比较文字"],
+          answer: 0,
+          hint: "== 是判断相等的运算符，5 和 5 相等吗？",
+          explain: "5 == 5 成立，结果是 True。",
+          cheer: "一阴一阳不相欺——相同就认相同。"
+        },
+        {
+          q: "n = 20，想让程序输出「成年」，请补全：",
+          kind: "fill",
+          code: "n = 20\nif n >= __1__:\n    print(\"成年\")",
+          slots: [["18", "20", "17", "19"]],
+          answer: [0],
+          hint: "二十岁满了多少岁才算成年？",
+          explain: "n >= 18 成立（20 ≥ 18），输出 成年。",
+          cheer: "玄龟背上的年轮，数到十八就盖章。"
+        },
+        {
+          q: "Python 里判断「是否相等」用哪个符号？",
+          options: ["==", "=", ":=", "!="],
+          answer: 0,
+          hint: "单个 = 是赋值，那判断相等用什么？",
+          explain: "== 判断相等，= 是赋值，别让玄龟咬错。",
+          cheer: "一横是给，两横是问——玄龟记得分明。"
+        }
+      ],
+      // 进阶
+      [
+        {
+          q: "score = 60，运行下面这段代码，输出什么？",
+          code: "score = 60\nif score >= 90:\n    print(\"天才\")\nelif score >= 60:\n    print(\"及格\")\nelse:\n    print(\"喂灵兽\")",
+          options: ["及格", "天才", "喂灵兽", "报错：elif 用错"],
+          answer: 0,
+          hint: "60 不满足 >=90，再判断 60 >= 60 成立吗？",
+          explain: "60 >= 90 为假，elif 60 >= 60 为真，输出 及格。",
+          cheer: "压线也是线，玄龟替你把这一脚踩稳。"
+        },
+        {
+          q: "elif 判断的顺序重要吗？运行下面代码输出什么？",
+          code: "x = 95\nif x >= 60:\n    print(\"及格\")\nelif x >= 90:\n    print(\"天才\")",
+          options: ["及格", "天才", "两行都输出", "报错：elif 不能接 if"],
+          answer: 0,
+          hint: "从上往下判断，命中第一个成立的条件就停下。",
+          explain: "95 先满足 >= 60，直接走第一分支，后面的 elif 不再判断。",
+          cheer: "先到先得——条件写在前面的，先做主。"
+        },
+        {
+          q: "运行下面的代码，输出几行？",
+          code: "if True:\n    print(\"一\")\n    print(\"二\")\nprint(\"三\")",
+          options: ["三行：一、二、三", "两行：一、二", "一行：一", "报错：True 不能当条件"],
+          answer: 0,
+          hint: "缩进的 print 都在 if 里，没缩进的 print 呢？",
+          explain: "一、二在 if 内都执行；三没缩进，无条件也会执行。",
+          cheer: "缩进是玄龟背上的纹路——归谁管，一看便知。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "x = 10\ny = 10\nif x > y:\n    print(\"大\")\nelse:\n    print(\"相等\")",
+          options: ["相等", "大", "两行都输出", "报错：x > y 写法不对"],
+          answer: 0,
+          hint: "10 比 10 大吗？不成立走哪里？",
+          explain: "x > y 为假，走 else，输出 相等。",
+          cheer: "势均力敌，玄龟谁也不偏。"
+        }
+      ],
+      // 登峰
+      [
+        {
+          q: "下面哪段代码会直接报错？",
+          options: [
+            "if 3 > 2:\n    print(\"对\")",
+            "if 3 > 2\n    print(\"对\")",
+            "if 3 > 2:\n    print(\"对\")\nelse:\n    print(\"错\")",
+            "if 3 == 3:\n    print(\"对\")"
+          ],
+          answer: 1,
+          hint: "if 条件写完后面要跟什么符号？",
+          explain: "if 条件必须以冒号结尾；少了冒号，语法错误。",
+          cheer: "玄龟慢悠悠地提醒：印要盖在正处——冒号不能省。"
+        },
+        {
+          q: "想判断 a 是否大于 b，请补全：",
+          kind: "fill",
+          code: "a = 9\nb = 5\nif a __1__ b:\n    print(\"a大\")",
+          slots: [[">", "<", "==", "="]],
+          answer: [0],
+          hint: "9 比 5 大，用哪个比较符？",
+          explain: "a > b 成立（9 > 5），输出 a大。",
+          cheer: "谁大谁小，玄龟一称便知。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "x = 5\nif x > 3:\n    print(\"大\")\nif x > 8:\n    print(\"更大\")",
+          options: ["大", "更大", "大 和 更大 两行", "什么都不输出"],
+          answer: 0,
+          hint: "这是两个独立的 if，分别判断：5 > 3 成立，5 > 8 成立吗？",
+          explain: "第一个 if 成立输出 大；第二个 if 不成立（5 < 8），不输出。",
+          cheer: "两个门各管各的——玄龟左右不串门。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "if 3 > 5:\n    print(\"A\")\nelif 5 > 3:\n    print(\"B\")\nelse:\n    print(\"C\")",
+          options: ["B", "A", "C", "A B 两行"],
+          answer: 0,
+          hint: "3 > 5 为假，再看 elif 的 5 > 3。",
+          explain: "if 条件假，elif 5 > 3 为真，输出 B。",
+          cheer: "一阴一阳走到底，玄龟总选对的那条路。"
+        }
+      ]
+    ],
+
+    // ---------------- 追风灵狼 · for 循环 ----------------
+    pet_lang: [
+      // 入门
+      [
+        {
+          q: "运行下面的代码，输出哪些数？",
+          code: "for i in range(4):\n    print(i)",
+          options: ["0、1、2、3", "1、2、3、4", "0、1、2、3、4", "1、2、3"],
+          answer: 0,
+          hint: "range(4) 从几开始、到几为止？",
+          explain: "range(4) 生成 0、1、2、3 四个数。",
+          cheer: "灵狼从 0 数起，四声不多不少。"
+        },
+        {
+          q: "想让 i 依次取 1、2、3，请补全：",
+          kind: "fill",
+          code: "for i in range(__1__):\n    print(i)",
+          slots: [["1, 4", "0, 3", "1, 3", "3"]],
+          answer: [0],
+          hint: "range 的规矩是含头不含尾。",
+          explain: "range(1, 4) 从 1 到 4 之前：1、2、3。",
+          cheer: "灵狼从 1 号猎物咬到 3 号，一只不落。"
+        },
+        {
+          q: "运行下面的代码，会先输出谁？",
+          code: "for name in [\"慕\", \"典\"]:\n    print(name)",
+          options: ["先慕后典", "先典后慕", "一次输出 慕典", "报错：列表不能遍历"],
+          answer: 0,
+          hint: "for 会按列表原来的顺序取值。",
+          explain: "列表里慕在前典在后，按顺序各输出一行。",
+          cheer: "灵狼循着脚印走，先闻到谁就先追谁。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "for n in [3, 1]:\n    print(n)",
+          options: ["3 和 1（各一行）", "1 和 3（各一行）", "31", "报错：数字不能遍历"],
+          answer: 0,
+          hint: "列表 [3, 1] 里谁在前？",
+          explain: "遍历列表按顺序：先 3，后 1，各占一行。",
+          cheer: "顺序就是狼群的队形，头狼在前。"
+        }
+      ],
+      // 进阶
+      [
+        {
+          q: "range(0, 3) 和 range(3) 的输出结果一样吗？",
+          options: ["一样，都是 0、1、2", "不一样", "都会报错", "range(0, 3) 多一个数"],
+          answer: 0,
+          hint: "range(0, 3) 从 0 到 2，range(3) 也从 0 到 2。",
+          explain: "range 默认从 0 开始，所以 range(0, 3) 与 range(3) 等价。",
+          cheer: "灵狼记得：从 0 起步的路，写不写 0 都一样长。"
+        },
+        {
+          q: "运行下面的代码，共输出几行？",
+          code: "for i in range(2):\n    print(i)\nprint(\"毕\")",
+          options: ["三行：0、1、毕", "两行：0、1", "两行：1、毕", "报错"],
+          answer: 0,
+          hint: "缩进的 print 循环两次；没缩进的 print 执行几次？",
+          explain: "循环内输出 0、1 两行，循环外输出 毕 一行，共三行。",
+          cheer: "狼群追完猎物，还得有一声收尾的长嚎。"
+        },
+        {
+          q: "想让循环体跑 3 遍，请补全：",
+          kind: "fill",
+          code: "for i in range(__1__):\n    print(\"第\", i, \"次\")",
+          slots: [["3", "4", "2", "1"]],
+          answer: [0],
+          hint: "range(3) 会跑几遍？",
+          explain: "range(3) 让循环体执行 3 遍（i = 0、1、2）。",
+          cheer: "三遍就是三遍，灵狼绝不偷工。"
+        },
+        {
+          q: "运行下面的代码，最后一行输出什么？",
+          code: "for i in range(3):\n    print(i)\nprint(i)",
+          options: ["2", "3", "0", "报错：循环结束后 i 不存在"],
+          answer: 0,
+          hint: "循环结束后，i 最后一次的值是多少？",
+          explain: "range(3) 里 i 最后是 2，循环后 i 仍可用，输出 2。",
+          cheer: "灵狼的脚印留在原地——最后一步是 2。"
+        }
+      ],
+      // 登峰
+      [
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "for i in [2, 0, 1]:\n    print(i)",
+          options: ["2、0、1", "0、1、2", "1、0、2", "报错：列表顺序乱了"],
+          answer: 0,
+          hint: "遍历顺序就是列表里元素的顺序。",
+          explain: "依次取出 2、0、1 各输出一行。",
+          cheer: "列表怎么排，狼群就怎么追——队形由你定。"
+        },
+        {
+          q: "想让输出是 0、遇、2，请补全：",
+          kind: "fill",
+          code: "for i in range(3):\n    if i == __1__:\n        print(\"遇\")\n    else:\n        print(i)",
+          slots: [["1", "0", "2", "3"]],
+          answer: [0],
+          hint: "i 依次是 0、1、2，哪一个该喊「遇」？",
+          explain: "i == 1 时输出 遇，其余输出 0 和 2。",
+          cheer: "狼群只在第二声停下——那是约好的暗号。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "total = 0\nfor i in range(1, 4):\n    total = total + i\nprint(total)",
+          options: ["6", "123", "1", "报错：total 不能累加"],
+          answer: 0,
+          hint: "total 依次加上 1、2、3，最后是多少？",
+          explain: "1 + 2 + 3 = 6，所以输出 6。",
+          cheer: "一头两头三头——灵狼清点战利品从不漏数。"
+        },
+        {
+          q: "下面哪段代码会报错？",
+          options: [
+            "for i in range(3):\n    print(i)",
+            "for i in range(3)\n    print(i)",
+            "for i in [1, 2]:\n    print(i)",
+            "for name in [\"慕\"]:\n    print(name)"
+          ],
+          answer: 1,
+          hint: "for 行末尾要有什么符号？",
+          explain: "for 条件行必须以冒号结尾；少了冒号就是语法错误。",
+          cheer: "灵狼嗅觉极准：缺了冒号的那句，一闻就是坏的。"
+        }
+      ]
+    ],
+
+    // ---------------- 雷纹幼蛟 · 筑基综合 ----------------
+    pet_jiao: [
+      // 入门（全卷基础综合）
+      [
+        {
+          q: "print(\"天劫\") 会输出什么？",
+          options: ["天劫", "\"天劫\"（连引号）", "什么都不输出", "报错"],
+          answer: 0,
+          hint: "引号只是文字的边界。",
+          explain: "输出引号里的文字：天劫。",
+          cheer: "幼蛟第一声长吟，天劫应声而亮。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "power = 9\nprint(power + 1)",
+          options: ["10", "9 1", "power + 1", "报错"],
+          answer: 0,
+          hint: "power 里装的是整数 9。",
+          explain: "9 + 1 = 10。",
+          cheer: "灵力蓄到九成，再添一成便圆满。"
+        },
+        {
+          q: "n = int(input(\"雷数：\"))，玩家输入 4，print(n * 2) 输出什么？",
+          options: ["8", "44", "4 2", "报错"],
+          answer: 0,
+          hint: "int() 已把输入变成整数 4。",
+          explain: "4 * 2 = 8。",
+          cheer: "四道雷翻倍成八——幼蛟眼里全是数。"
+        },
+        {
+          q: "for i in range(3) 会让循环体执行几次？",
+          options: ["3 次", "2 次", "4 次", "0 次"],
+          answer: 0,
+          hint: "range(3) 生成几个数？",
+          explain: "range(3) 生成 0、1、2 三个数，循环体执行 3 次。",
+          cheer: "三重雷劫，一次都不能躲。"
+        }
+      ],
+      // 进阶（跨章混合小坑）
+      [
+        {
+          q: "运行下面的代码，输入 75，输出什么？",
+          code: "score = int(input(\"分：\"))\nif score >= 60:\n    print(\"过\")\nelse:\n    print(\"败\")",
+          options: ["过", "败", "报错：int 不能转", "两行都输出"],
+          answer: 0,
+          hint: "75 转成整数后满足 >= 60 吗？",
+          explain: "75 >= 60 成立，输出 过。",
+          cheer: "input 与 if 联手，幼蛟过线即腾。"
+        },
+        {
+          q: "想让雷诀输出 第1道雷 到 第3道雷，请补全：",
+          kind: "fill",
+          code: "for i in range(__1__):\n    print(\"雷\", i + 1)",
+          slots: [["3", "2", "4", "1"]],
+          answer: [0],
+          hint: "i + 1 让编号从 1 开始，要三行需要 range 几？",
+          explain: "range(3) 让 i = 0、1、2，i + 1 得到 1、2、3。",
+          cheer: "幼蛟数雷，从一到三，一声不差。"
+        },
+        {
+          q: "print(\"渡\" + str(3)) 会输出什么？",
+          options: ["渡3", "渡 3", "渡3.0", "报错"],
+          answer: 0,
+          hint: "str(3) 把 3 变成 \"3\"，字符串拼接无空格。",
+          explain: "\"渡\" + \"3\" = 渡3。",
+          cheer: "渡字连上数字，正好盖下天劫的印。"
+        },
+        {
+          q: "运行下面的代码，输出几行？",
+          code: "for n in [2, 2]:\n    print(n)",
+          options: ["两行，都是 2", "一行 2", "两行：2 和 22", "报错：列表里有重复"],
+          answer: 0,
+          hint: "列表里有两个元素，循环就执行几次。",
+          explain: "每次取出一个 2 输出一行，共两行 2。",
+          cheer: "重复的天雷也得一道道挨——幼蛟最懂。"
+        }
+      ],
+      // 登峰（全卷最高难度：综合找错 / 多步预测）
+      [
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "for i in range(3):\n    if i == 1:\n        print(\"一\")\n    else:\n        print(i)",
+          options: ["0、一、2", "一、0、2", "0、1、2", "报错：if 不能嵌在 for 里"],
+          answer: 0,
+          hint: "i 依次为 0、1、2，只有 i == 1 时走 if 分支。",
+          explain: "i=0 输出 0；i=1 输出 一；i=2 输出 2。",
+          cheer: "for 套 if，幼蛟在雷云里闪转腾挪。"
+        },
+        {
+          q: "想让输出从 第1道雷 开始编号，请补全：",
+          kind: "fill",
+          code: "for i in range(3):\n    print(\"第\", __1__ + 1, \"道雷\")",
+          slots: [["i", "1", "0", "i + 1"]],
+          answer: [0],
+          hint: "这里已经有「+ 1」了，前面该填 i 还是别的？",
+          explain: "i + 1 让 i=0 时输出 第 1 道雷；填 i 即可。",
+          cheer: "编号从一而起，幼蛟的鳞片从头数到尾。"
+        },
+        {
+          q: "下面哪一段会报错？",
+          options: [
+            "age = input(\"岁：\")\nprint(age + 1)",
+            "age = int(input(\"岁：\"))\nprint(age + 1)",
+            "age = \"18\"\nprint(age)",
+            "age = 18\nprint(age + 1)"
+          ],
+          answer: 0,
+          hint: "input 返回的是字符串，字符串能直接加整数吗？",
+          explain: "age 是字符串 \"18\"，加整数 1 会 TypeError；要先 int(age)。",
+          cheer: "幼蛟一眼咬住七寸：类型不对，法诀必炸。"
+        },
+        {
+          q: "运行下面的代码，输出什么？",
+          code: "n = 3\nif n > 2:\n    for i in range(2):\n        print(i)",
+          options: ["0、1", "2、0", "1、2", "什么都不输出"],
+          answer: 0,
+          hint: "n > 2 成立后才进入循环；range(2) 输出哪两个数？",
+          explain: "3 > 2 成立，for 循环输出 0、1 两行。",
+          cheer: "条件过线、循环起势——幼蛟整套身法连贯。"
+        }
+      ]
+    ]
+  }
 };

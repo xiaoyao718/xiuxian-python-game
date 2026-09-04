@@ -10,6 +10,8 @@
   const LS_KEY = "xiuxian-python-game-v2";
   const LS_KEY_V1 = "xiuxian-python-game-v1";
   const LABEL = ["甲", "乙", "丙", "丁"];
+  // 山河路线图：节点序数（终章用“劫”）
+  const MAP_SEAL = ["一", "二", "三", "四", "五", "劫"];
   const reducedMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // 打字机速度：字/秒（约 40–60，可按需调高 TYPE_CPS）
@@ -51,7 +53,11 @@
       mistakes: [],
       achievements: [],
       settings: { sound: true, fx: true },
-      boss: false
+      boss: false,
+      // i2-3：灵宠（stage/growth/cleared 三组题组完成标记）、灵器、灵石
+      pets: {},
+      artifacts: [],
+      spiritStones: 0
     };
   }
 
@@ -76,6 +82,33 @@
       s.settings.fx = p.settings.fx !== false;
     }
     s.boss = !!p.boss;
+    // 灵宠：只收合法 id，脏档自动补默认（stage 0..2 / growth >=0 / cleared 三格）
+    const petDefs = (D && Array.isArray(D.pets)) ? D.pets : [];
+    if (p.pets && typeof p.pets === "object") {
+      petDefs.forEach(function (def) {
+        const got = p.pets[def.id];
+        if (!got || typeof got !== "object") return;
+        let stage = Math.max(0, Math.min(2, Math.floor(Number(got.stage) || 0)));
+        let growth = Math.max(0, Math.floor(Number(got.growth) || 0));
+        const cleared = Array.isArray(got.cleared)
+          ? got.cleared.map(function (v) {
+              return !!v;
+            })
+          : [];
+        while (cleared.length < 3) cleared.push(false);
+        s.pets[def.id] = { stage: stage, growth: growth, cleared: cleared.slice(0, 3) };
+      });
+    }
+    if (Array.isArray(p.artifacts)) {
+      const artIds = {};
+      (D && Array.isArray(D.artifacts) ? D.artifacts : []).forEach(function (a) {
+        artIds[a.id] = true;
+      });
+      s.artifacts = p.artifacts.filter(function (id) {
+        return typeof id === "string" && artIds[id];
+      });
+    }
+    s.spiritStones = Math.max(0, Math.floor(Number(p.spiritStones) || 0));
     return s;
   }
 
@@ -137,6 +170,8 @@
     coverShown: false,
     finaleShown: false,
     fillWrong: false,
+    justWrong: false,
+    quizMistake: false,
     tries: 0,
     answer: "",
     // C 型补全题会话状态
@@ -188,6 +223,18 @@
       }
     } catch (e) {
       // 音效异常一律忽略
+    }
+  }
+
+  // 灵宠/行囊系统的集中事后入口（i2-3）：由 js/pet.js 挂到 window.App，
+  // 引擎只在关键回调末尾调用一次，不改动既有判定逻辑。
+  function callApp(name, a, b) {
+    try {
+      if (window.App && typeof window.App[name] === "function") {
+        window.App[name](a, b);
+      }
+    } catch (e) {
+      // 附加系统异常一律不影响主流程
     }
   }
 
@@ -441,54 +488,125 @@
       const card = stageBox.querySelector(".card");
       if (card) card.classList.add("wipe-card");
     }
+    // 答错反噬：题卡微震 + 墨渍扩散（仅本次重绘一次，i2-2）
+    if (cur.justWrong) {
+      cur.justWrong = false;
+      const card = stageBox.querySelector(".card");
+      if (card && !reducedMotion) {
+        card.classList.add("shake");
+        const splat = document.createElement("span");
+        splat.className = "ink-splat";
+        card.appendChild(splat);
+      }
+    }
     applyScene(override);
   }
 
-  // ---------- 全屏灵尘：缓缓上升的光点 ----------
-  function buildMotes() {
-    const box = document.getElementById("motes");
-    if (!box || box.childElementCount) return;
-    let html = "";
-    for (let i = 0; i < 26; i++) {
-      const left = (i * 47 + 11) % 100;
-      const size = i % 7 === 0 ? 5 : i % 5 === 0 ? 4 : i % 2 === 0 ? 3 : 2;
-      const dur = (7 + ((i * 29) % 80) / 10).toFixed(1);
-      const delay = (-(((i * 47) % 100) / 100) * dur).toFixed(2);
-      const sway = ((i * 37) % 90) - 45;
-      const cls = i % 6 === 2 ? " mote-qi" : "";
-      html +=
-        '<i class="mote' + cls + '" style="left:' + left + "%;width:" + size + "px;height:" + size +
-        "px;--sway:" + sway + "px;animation-duration:" + dur + "s;animation-delay:" + delay + 's"></i>';
+  // 聚灵槽（i2-2）：历练/试炼题卡顶部的进度条，每题答对点亮一格
+  function qiMeterHTML() {
+    if (cur.phase !== "quest" && cur.phase !== "quiz") return "";
+    const lv = D.levels[cur.li];
+    let total;
+    if (cur.phase === "quest") {
+      total = questQuestionCount();
+    } else {
+      total = quizPoolFor(lv).length;
     }
-    box.innerHTML = html;
+    if (!total) return "";
+    const qi = currentQi();
+    const filled = Math.min(total, qi + (cur.qDone ? 1 : 0));
+    let cells = "";
+    for (let i = 0; i < total; i++) {
+      cells += '<span class="qi-cell' + (i < filled ? " filled" : "") + '"></span>';
+    }
+    return (
+      '<div class="qi-meter' + (filled >= total ? " is-full" : "") + '">' +
+      '<div class="qi-meter-cells">' + cells + "</div>" +
+      '<div class="qi-meter-note">聚灵 <b>' + filled + "</b>/" + total + "</div>" +
+      "</div>"
+    );
   }
 
-  // ---------- 侧栏路线图 ----------
-  function renderRoadmap() {
+  // ---------- 侧栏：山河修行路线图（i2-2 S3） ----------
+  // 纵向画卷：内联 SVG 弯曲路径 + 灵纹盘节点（done=朱印过 / current=金圈脉动 /
+  // locked=灰暗云遮）。通关新段触发一次“金线流淌”（仅桌面且非 reduced-motion）。
+  const MAP_STEP = 62; // 节点纵向间距（px），与 CSS 视觉高度对齐
+  const MAP_TOP = 4; // 第一个节点顶部偏移
+
+  function mapY(i) {
+    return MAP_TOP + i * MAP_STEP;
+  }
+
+  function renderRoadmap(animateNew) {
     const box = document.getElementById("roadmap");
+    const tip = document.getElementById("heroTip");
     document.getElementById("volumeName").textContent = D.meta.volume;
-    document.getElementById("heroTip").textContent =
-      "主角：" + D.meta.hero + " · 境界：" + currentRealm() + " · 进度 " + progressText();
+    tip.innerHTML =
+      "主角：" + esc(D.meta.hero) + " · 境界：" +
+      '<span class="realm-cell"><span class="realm-glow">' + esc(currentRealm()) + "</span></span>" +
+      " · 进度 " + esc(progressText());
 
     const first = firstUndone();
-    box.innerHTML = D.levels
+    const n = D.levels.length;
+    const totalH = MAP_TOP + n * MAP_STEP + 44;
+    const litSeg = animateNew ? state.done.length - 1 : -1; // 新点亮的连接段下标
+
+    // 连接段状态：第 i 段连接 i → i+1；其终点被点亮即 done，指向“当前”节点则脉动
+    const segState = [];
+    for (let i = 0; i < n - 1; i++) {
+      if (isDone(D.levels[i + 1].id)) {
+        segState.push("done");
+      } else if (first === i + 1) {
+        segState.push("current");
+      } else {
+        segState.push("locked");
+      }
+    }
+
+    let segHtml = "";
+    for (let i = 0; i < n - 1; i++) {
+      const y0 = mapY(i) + 17;
+      const y1 = mapY(i + 1) + 17;
+      let cls = "map-seg " + segState[i];
+      if (i === litSeg && litSeg >= 0 && !reducedMotion) cls += " just-lit";
+      segHtml +=
+        '<path class="' + cls + '" pathLength="1" d="M 17 ' + y0 +
+        " C 54 " + y0 + ", 54 " + y1 + ", 17 " + y1 + '"></path>';
+    }
+
+    const nodesHtml = D.levels
       .map(function (lv, i) {
         const done = isDone(lv.id);
         const current = i === first;
-        const cls = done ? "road-node done" : current ? "road-node current" : "road-node locked";
-        const status = done ? "过" : "";
+        const cls = done ? "map-node done" : current ? "map-node current" : "map-node locked";
+        const sealChar = done ? "过" : MAP_SEAL[i] || "关";
         const canClick = done || current;
+        const aria = canClick
+          ? "重游 " + lv.chapter + "·" + lv.title
+          : "尚未解锁：" + lv.chapter + "·" + lv.title;
         return (
-          '<div class="' + cls + '" data-i="' + i + '"' +
+          '<button class="' + cls + '" data-i="' + i + '" type="button"' +
+          ' style="top:' + mapY(i) + 'px"' +
+          ' aria-label="' + esc(aria) + '"' +
           (canClick ? ' title="重游本章"' : "") + ">" +
-          '<span class="node-status">' + status + "</span>" +
-          "<span>" + esc(lv.chapter + " · " + lv.title) + "</span>" +
-          "</div>"
+          '<span class="map-seal">' + sealChar + "</span>" +
+          '<span class="map-label">' + esc(lv.chapter + " · " + lv.title) +
+          "<small>" + esc(lv.stageLabel) + "</small></span>" +
+          "</button>"
         );
       })
       .join("");
 
-    box.querySelectorAll(".road-node.done, .road-node.current").forEach(function (node) {
+    box.innerHTML =
+      '<div class="map-scroll" style="height:' + totalH + 'px">' +
+      '<svg class="map-track" viewBox="0 0 100 ' + totalH +
+      '" preserveAspectRatio="none" aria-hidden="true">' +
+      segHtml +
+      "</svg>" +
+      nodesHtml +
+      "</div>";
+
+    box.querySelectorAll(".map-node.done, .map-node.current").forEach(function (node) {
       node.addEventListener("click", function () {
         closeSideDrawer();
         goStory(Number(node.getAttribute("data-i")));
@@ -505,6 +623,22 @@
     if (who === "林韬" || who === "周显") return { role: "antagonist", seal: "嘲" };
     const first = who ? String(who).charAt(0) : "语";
     return { role: "npc", seal: first };
+  }
+
+  // 立绘槽位（i2-4 E 项）：
+  //  - 非旁白说话人左侧加 .portrait-slot；当前以「墨色剪影圆盘 + 单字朱印」占位；
+  //  - 对接规范：未来插画放 assets/portraits/<who>.svg（512x512 透明底、墨金朱风格），
+  //    引擎会自动 <img> 加载并盖在占位印上方，无需改渲染逻辑；
+  //  - 插画缺失时 img 的 onerror 自行移除，占位印照常显示，无布局抖动。
+  function portraitSlotHTML(who, seal) {
+    const src = "assets/portraits/" + String(who || "未知") + ".svg";
+    return (
+      '<div class="portrait-slot">' +
+      '<img src="' + esc(src) + '" alt="" loading="lazy" ' +
+      'onerror="this.parentNode.removeChild(this)">' +
+      '<span class="portrait-seal">' + esc(seal) + "</span>" +
+      "</div>"
+    );
   }
 
   function dialogHTML(lines, i, isOutro) {
@@ -526,13 +660,24 @@
           : "") +
         "</div>";
     }
-    return (
+    const itemOpen =
       art +
       '<div class="dialog-item" data-who="' + name + '" data-role="' + roleInfo.role + '">' +
       '<div class="who-name" data-seal="' + esc(roleInfo.seal) + '">' + name + "</div>" +
       '<div class="who-text type-text">' + text + "</div>" +
-      "</div>"
-    );
+      "</div>";
+    if (roleInfo.role === "narrator") return itemOpen;
+    // 非旁白：左侧立绘槽 + 对话主体（保留原 who-name/who-text 结构供打字机与样式使用）
+    const body =
+      '<div class="dialog-item has-portrait" data-who="' + name + '" data-role="' +
+      roleInfo.role + '">' +
+      portraitSlotHTML(line.who, roleInfo.seal) +
+      '<div class="dialog-body">' +
+      '<div class="who-name" data-seal="' + esc(roleInfo.seal) + '">' + name + "</div>" +
+      '<div class="who-text type-text">' + text + "</div>" +
+      "</div>" +
+      "</div>";
+    return art + body;
   }
 
   function navHTML(opts) {
@@ -610,6 +755,8 @@
     cur.fill = [];
     cur.fillSig = "";
     cur.fillWrong = false;
+    cur.justWrong = false;
+    cur.quizMistake = false;
     cur.redoLevelId = "";
     cur.redoPool = "";
     cur.redoQi = -1;
@@ -619,6 +766,7 @@
     document.documentElement.removeAttribute("data-tries");
     bossTriesPainted = 0;
     cur.wipeNext = true;
+    callApp("onEnterLevel", cur.li);
     paintStory();
   }
 
@@ -733,6 +881,7 @@
       cur.questDone = false;
       cur.fill = [];
       cur.fillSig = "";
+      cur.justWrong = false;
     }
     cur.phase = "quest";
     paintQuest();
@@ -970,6 +1119,7 @@
     stageBox.innerHTML =
       '<div class="card">' +
       miniHead(cur.li) +
+      qiMeterHTML() +
       '<div class="quiz-head">' + esc(info.head) + "</div>" +
       '<div class="q-text">' + esc(q.q) + "</div>" +
       (q.code ? '<pre class="code-block q-code">' + esc(q.code) + "</pre>" : "") +
@@ -1071,6 +1221,7 @@
     stageBox.innerHTML =
       '<div class="card">' +
       miniHead(cur.li) +
+      qiMeterHTML() +
       '<div class="quiz-head">' + esc(info.head) + " · 补全法诀</div>" +
       '<div class="q-text">' + esc(q.q) + "</div>" +
       '<div id="fillZone" class="fill-zone">' +
@@ -1152,8 +1303,14 @@
       cur.fillWrong = false;
       forgetMistake(q);
       sfx("right");
+      if (cur.phase === "quest" || cur.phase === "quiz" || cur.phase === "redo") {
+        callApp("onQuestionCorrect", D.levels[cur.li].id, q);
+        if (cur.phase === "redo") callApp("onRedoCorrect", D.levels[cur.li].id, q);
+      }
     } else {
       cur.fillWrong = true;
+      if (cur.phase === "quest" || cur.phase === "quiz") cur.justWrong = true;
+      if (cur.phase === "quiz") cur.quizMistake = true;
       recordMistake(q, fillCodeOf(q, cur.fill));
       sfx("wrong");
     }
@@ -1168,8 +1325,14 @@
       cur.fillWrong = false;
       forgetMistake(q);
       sfx("right");
+      if (cur.phase === "quest" || cur.phase === "quiz" || cur.phase === "redo") {
+        callApp("onQuestionCorrect", D.levels[cur.li].id, q);
+        if (cur.phase === "redo") callApp("onRedoCorrect", D.levels[cur.li].id, q);
+      }
     } else {
       wrongSet.push(oi);
+      if (cur.phase === "quest" || cur.phase === "quiz") cur.justWrong = true;
+      if (cur.phase === "quiz") cur.quizMistake = true;
       recordMistake(q, String((q.options || [])[oi] || ""));
       sfx("wrong");
     }
@@ -1220,6 +1383,8 @@
       cur.fill = [];
       cur.fillSig = "";
       cur.fillWrong = false;
+      cur.quizMistake = false;
+      cur.justWrong = false;
     }
     cur.phase = "quiz";
     cur.wipeNext = true;
@@ -1446,14 +1611,21 @@
   // ---------- 破境 & 结尾剧情 ----------
   function finishLevel() {
     const lv = D.levels[cur.li];
-    if (!isDone(lv.id)) {
+    const firstTime = !isDone(lv.id);
+    if (firstTime) {
       state.done.push(lv.id);
     }
     if (lv.kind === "boss") {
       state.boss = true;
     }
     saveState();
-    renderRoadmap();
+    // 通关点亮动画：仅本次新完成的连接段做金线流淌（i2-2）
+    renderRoadmap(firstTime && !reducedMotion ? true : undefined);
+    // i2-3：解锁灵宠/灵器；试炼零失误给主宠额外成长
+    callApp("afterLevelDone", lv.id, firstTime);
+    if (cur.phase === "quiz" && !cur.quizMistake) {
+      callApp("onQuizPerfect", lv.id);
+    }
     breakthrough();
   }
 
@@ -1517,6 +1689,19 @@
       '<div class="break-skip">轻触画面 · 跳过法相</div>' +
       "</div>";
 
+    // Boss 渡劫演出：雷云下压后三次雷闪逐次增强（复用 flashHit，i2-2）
+    if (isBoss && !reducedMotion) {
+      window.setTimeout(function () {
+        pageLightning();
+      }, 260);
+      window.setTimeout(function () {
+        pageLightning();
+      }, 780);
+      window.setTimeout(function () {
+        pageLightning();
+      }, 1280);
+    }
+
     let ended = false;
     function endBreakFx() {
       if (ended) return;
@@ -1528,6 +1713,8 @@
       cur.wipeNext = true;
       paintClear();
       sfx("seal");
+      // 破境落定：侧栏新境界文字做一次「拓印浮现」（i2-1 S4）
+      stampRealmFX();
     }
     function onKeySkip(ev) {
       if (ev.key === "Escape" || ev.key === "Enter" || ev.key === " ") {
@@ -1542,6 +1729,18 @@
   }
 
   // ---------- 破境结算：直接开启下一章，或先看本章尾声 ----------
+  // 破境落定后，让侧栏 heroTip 的新境界文字做一次「拓印浮现」（i2-1）
+  function stampRealmFX() {
+    const tip = document.getElementById("heroTip");
+    if (!tip || reducedMotion) return;
+    tip.classList.remove("stamping");
+    void tip.offsetWidth;
+    tip.classList.add("stamping");
+    window.setTimeout(function () {
+      tip.classList.remove("stamping");
+    }, 2400);
+  }
+
   function paintClear() {
     const lv = D.levels[cur.li];
     const isBoss = lv.kind === "boss";
@@ -1561,6 +1760,7 @@
       "</div>" +
       "</div>";
     finishStage();
+    stampRealmFX();
   }
 
   function readOutro() {
@@ -1616,13 +1816,15 @@
 
   // ---------- 渡劫（A 类：写代码） ----------
   // 整页雷闪 + data-tries 挂点（只挂视觉，不碰 submitBoss 判定）
+  let lightningTimer = null;
   function pageLightning() {
     const hit = document.getElementById("flashHit");
     if (!hit || reducedMotion) return;
+    if (lightningTimer) window.clearTimeout(lightningTimer);
     hit.classList.remove("on");
     void hit.offsetWidth;
     hit.classList.add("on");
-    window.setTimeout(function () {
+    lightningTimer = window.setTimeout(function () {
       hit.classList.remove("on");
     }, 850);
   }
@@ -2046,7 +2248,62 @@
     copyBossCode: copyBossCode,
     // 供 runner.js「一键填入」复用与提交判定完全一致的输出清洗规则
     normOutput: norm,
-    reset: resetProgress
+    reset: resetProgress,
+    // ---------- i2-3：灵宠/行囊系统所需的最小接口（由 js/pet.js 调用） ----------
+    judgeQuestion: function (q, chosen) {
+      if (!q) return false;
+      if (q.kind === "fill") {
+        return fillCodeOf(q, chosen) === fillCodeOf(q, q.answer);
+      }
+      return chosen === q.answer;
+    },
+    codeOf: function (q, chosen) {
+      return fillCodeOf(q, chosen);
+    },
+    correctOf: function (q) {
+      return correctAnswerOf(q);
+    },
+    getBag: function () {
+      return {
+        pets: JSON.parse(JSON.stringify(state.pets || {})),
+        artifacts: (state.artifacts || []).slice(),
+        stones: state.spiritStones || 0,
+        done: (state.done || []).slice()
+      };
+    },
+    setBag: function (bag) {
+      if (!bag || typeof bag !== "object") return;
+      // 灵宠：白名单 + 字段清洗，绝不让脏数据进存档
+      const petDefs = Array.isArray(D.pets) ? D.pets : [];
+      const nextPets = {};
+      petDefs.forEach(function (def) {
+        const got = bag.pets && bag.pets[def.id];
+        if (!got || typeof got !== "object") return;
+        const stage = Math.max(0, Math.min(2, Math.floor(Number(got.stage) || 0)));
+        const growth = Math.max(0, Math.floor(Number(got.growth) || 0));
+        const cleared = Array.isArray(got.cleared)
+          ? got.cleared.map(function (v) {
+              return !!v;
+            })
+          : [];
+        while (cleared.length < 3) cleared.push(false);
+        nextPets[def.id] = { stage: stage, growth: growth, cleared: cleared.slice(0, 3) };
+      });
+      state.pets = nextPets;
+      const artIds = {};
+      (Array.isArray(D.artifacts) ? D.artifacts : []).forEach(function (a) {
+        artIds[a.id] = true;
+      });
+      state.artifacts = Array.isArray(bag.artifacts)
+        ? bag.artifacts.filter(function (id) {
+            return typeof id === "string" && artIds[id];
+          })
+        : [];
+      state.spiritStones = Math.max(0, Math.floor(Number(bag.stones) || 0));
+      saveState();
+    },
+    // 供行囊/操练 overlay 使用：关闭移动端抽屉
+    closeDrawer: closeSideDrawer
   };
 
   // ---------- 启动 ----------
@@ -2065,7 +2322,7 @@
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") closeSideDrawer();
   });
-  buildMotes();
+  // 灵尘粒子已迁移至 js/fx.js 的 Canvas 粒子层（i2-1）
   renderRoadmap();
   refreshMistakeBadge();
 

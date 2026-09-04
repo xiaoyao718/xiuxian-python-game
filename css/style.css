@@ -347,28 +347,6 @@ html[data-scene="6"] .env-rain {
   background: radial-gradient(70% 58% at 50% 26%, rgba(205, 222, 233, 0.24), transparent 72%);
 }
 
-/* 全屏灵尘：浮在整个页面上层，触不到但不挡操作 */
-#motes {
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-#motes i {
-  position: absolute;
-  bottom: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 240, 205, 0.95) 0%, rgba(226, 199, 135, 0.55) 55%, rgba(226, 199, 135, 0) 78%);
-  box-shadow: 0 0 8px rgba(226, 199, 135, 0.65);
-  filter: blur(0.4px);
-  opacity: 0;
-  animation-name: moteUp;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
 /* 各关天色：凡人暗夜 → 纹谱灯火 → 晨雾聚气 → 山门吐纳 → 纹试石台 → 夜枭幽谷 → 筑基天劫 → 破晓 */
 :root[data-scene="1"] {
   --scene-sky:
@@ -467,23 +445,6 @@ html[data-scene="6"] .env-rain {
   to {
     opacity: 1;
     transform: translateX(4%);
-  }
-}
-
-@keyframes moteUp {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.7);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.8;
-  }
-  60% {
-    opacity: 0.55;
-  }
-  100% {
-    transform: translate3d(var(--sway, 24px), -108vh, 0) scale(1);
-    opacity: 0;
   }
 }
 
@@ -2438,16 +2399,6 @@ html[data-scene="3"] .env-art {
   }
 }
 
-/* 灵尘：数量与色彩更丰（含青灵气光点） */
-#motes i.mote-qi {
-  background: radial-gradient(circle, rgba(218, 246, 235, 0.9) 0%, rgba(143, 211, 196, 0.5) 55%, rgba(143, 211, 196, 0) 78%);
-  box-shadow: 0 0 8px rgba(143, 211, 196, 0.5);
-}
-
-html[data-scene="0"] #motes {
-  opacity: 0.95;
-}
-
 /* ---- 破境：金灵力汇聚 + 光柱 + 冲击波 ---- */
 .break-veil {
   cursor: pointer;
@@ -2597,7 +2548,6 @@ html[data-scene="6"][data-tries="3"] .scene-beams {
     scroll-behavior: auto;
   }
 
-  #motes,
   .scene-fog-a,
   .scene-fog-b {
     display: none;
@@ -3195,5 +3145,1633 @@ select:focus-visible,
   .diff-cell {
     font-size: 12px;
     padding: 6px 8px;
+  }
+}
+
+/* ============================================================
+   第二迭代 v1.1（山鸣谷应）
+   S1 场景动态 / S4 手感 · S2 演出化 · S3 山河路线图 ·
+   S5 灵宠 / S6 灵器行囊 · E 立绘槽位
+   ============================================================ */
+
+/* ---- Canvas 粒子层与涟漪 ---- */
+#fxParticles {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+#ripples {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ink-ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 1px solid rgba(233, 225, 204, 0.34);
+  box-shadow: inset 0 0 8px rgba(169, 58, 45, 0.10);
+  opacity: 0.75;
+  transform: scale(0.18);
+  animation: inkRipple 0.58s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes inkRipple {
+  to {
+    transform: scale(13);
+    opacity: 0;
+  }
+}
+
+/* ---- 自定义光标：金色灵纹笔尖（仅桌面精细指针） ---- */
+@media (pointer: fine) {
+  body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cpath d='M4 2 L2 4 L9 13 L7.5 17.5 L12 14 L20 18 L22 16 L14 8 L18 6 Z' fill='%23c8a44b' fill-opacity='0.92' stroke='%23302818' stroke-width='0.6'/%3E%3Ccircle cx='4' cy='4' r='2.2' fill='%23a93a2d' fill-opacity='0.85'/%3E%3C/svg%3E")
+      2 2,
+      auto;
+  }
+
+  textarea,
+  input,
+  select {
+    cursor: text;
+  }
+}
+
+/* ---- 场景呼吸：远山 / 云海（叠加在既有 transform 动画之外的小幅缓移） ---- */
+#atmosphere .scene-far {
+  transform: translate3d(
+    calc(var(--px, 0) * 7px),
+    calc(var(--py, 0) * 4px + var(--scy, 0px)),
+    0
+  );
+  will-change: transform;
+}
+
+#atmosphere .scene-far::before {
+  animation: farBreath 26s ease-in-out infinite alternate;
+}
+
+#atmosphere .scene-far::after {
+  animation: farBreathB 34s ease-in-out infinite alternate;
+}
+
+@keyframes farBreath {
+  from {
+    opacity: 0.74;
+  }
+  to {
+    opacity: 0.84;
+  }
+}
+
+@keyframes farBreathB {
+  from {
+    opacity: 0.62;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+/* 云海：把原 cloudSea 的左右漂移并入指针视差系数 0.8（改写同名 keyframes，后者生效） */
+@keyframes cloudSea {
+  from {
+    transform: translate3d(calc(-1.6% + var(--px, 0) * 8px), 0, 0);
+  }
+  to {
+    transform: translate3d(calc(1.6% + var(--px, 0) * 8px), 0, 0);
+  }
+}
+
+.scene-clouds {
+  will-change: transform;
+}
+
+/* 近景层（地点画）：指针系数 1.2，滚动缓移 0.3 */
+#atmosphere .env-art {
+  transform: translate3d(
+    calc(var(--px, 0) * 15px),
+    calc(var(--py, 0) * 9px),
+    0
+  ) scale(1.01);
+  will-change: transform;
+}
+
+/* ---- 烛火摇曳：scene1 油灯 / scene3 灯笼（不规则 flicker） ---- */
+:root[data-scene="1"] .scene-light,
+:root[data-scene="3"] .scene-light {
+  animation: lampFlicker 4.7s ease-in-out infinite;
+}
+
+@keyframes lampFlicker {
+  0%,
+  100% {
+    opacity: 0.78;
+    transform: translateX(-0.4%) scale(1);
+  }
+  7% {
+    opacity: 0.92;
+    transform: translateX(0.3%) scale(1.01);
+  }
+  14% {
+    opacity: 0.7;
+    transform: translateX(-0.5%);
+  }
+  23% {
+    opacity: 0.96;
+    transform: translateX(0.5%) scale(1.015);
+  }
+  34% {
+    opacity: 0.82;
+  }
+  47% {
+    opacity: 0.68;
+    transform: translateX(-0.2%);
+  }
+  61% {
+    opacity: 0.9;
+    transform: translateX(0.2%) scale(1.01);
+  }
+  76% {
+    opacity: 0.75;
+  }
+  88% {
+    opacity: 0.94;
+    transform: translateX(-0.35%) scale(1.008);
+  }
+}
+
+/* scene5 月光缓慢呼吸 */
+:root[data-scene="5"] .scene-light {
+  animation: moonBreathe 9s ease-in-out infinite alternate;
+}
+
+@keyframes moonBreathe {
+  from {
+    opacity: 0.45;
+    transform: translateY(1.2%);
+  }
+  to {
+    opacity: 0.8;
+    transform: translateY(-1.2%);
+  }
+}
+
+/* ---- 手感：境界文字流光 + 破境拓印浮现 ---- */
+.tip .realm-cell {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  vertical-align: bottom;
+  line-height: 1.4;
+}
+
+.realm-glow {
+  position: relative;
+  color: #e0c887;
+  text-shadow: 0 0 8px rgba(200, 164, 75, 0.12);
+}
+
+.realm-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 32%,
+    rgba(255, 244, 214, 0.95) 50%,
+    transparent 68%
+  );
+  background-size: 240% 100%;
+  mix-blend-mode: screen;
+  animation: realmSweep 5.2s linear infinite;
+}
+
+@keyframes realmSweep {
+  from {
+    background-position: 190% 0;
+  }
+  to {
+    background-position: -90% 0;
+  }
+}
+
+.tip.stamping .realm-cell {
+  border: 1px solid rgba(169, 58, 45, 0.55);
+  box-shadow: 0 0 14px rgba(169, 58, 45, 0.35);
+  animation: realmCellStamp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  padding: 0 3px;
+}
+
+.tip.stamping .realm-glow {
+  animation: realmStampText 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes realmCellStamp {
+  0% {
+    border-color: rgba(169, 58, 45, 0);
+    box-shadow: none;
+  }
+  18% {
+    border-color: rgba(169, 58, 45, 0.9);
+    box-shadow: 0 0 18px rgba(169, 58, 45, 0.55);
+    transform: scale(1.12) rotate(-1deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes realmStampText {
+  0% {
+    opacity: 0.25;
+    filter: blur(4px) sepia(0.6) saturate(1.6);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* ---- 通用演出工具类 ---- */
+.shake {
+  animation: fxShake 0.25s ease both;
+  will-change: transform;
+}
+
+.zoom-pulse {
+  animation: zoomPulse 0.45s ease both;
+  will-change: transform;
+}
+
+@keyframes fxShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(1px);
+  }
+}
+
+@keyframes zoomPulse {
+  0% {
+    transform: scale(1);
+  }
+  38% {
+    transform: scale(1.028);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 答错反噬：墨渍扩散点（由引擎挂进题卡） */
+.ink-splat {
+  position: absolute;
+  right: -70px;
+  bottom: -88px;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(circle, rgba(4, 3, 2, 0.9) 0%, rgba(4, 3, 2, 0) 68%);
+  opacity: 0;
+  animation: inkSplat 0.62s ease-out both;
+}
+
+@keyframes inkSplat {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  16% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+/* ---- 聚灵槽（答题轻战斗） ---- */
+.qi-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.qi-meter-cells {
+  display: flex;
+  flex: 1;
+  gap: 5px;
+}
+
+.qi-cell {
+  position: relative;
+  flex: 1;
+  height: 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(200, 164, 75, 0.22);
+  background: rgba(233, 225, 204, 0.04);
+  overflow: hidden;
+}
+
+.qi-cell.filled::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #ffe9a8 0%, #d8ad54 55%, #a8832f 100%);
+  box-shadow: 0 0 8px rgba(255, 224, 150, 0.5);
+  transform-origin: left center;
+  animation: qiFill 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes qiFill {
+  from {
+    transform: scaleX(0);
+    filter: brightness(1.8);
+  }
+  to {
+    transform: scaleX(1);
+    filter: none;
+  }
+}
+
+.qi-meter.is-full .qi-meter-cells {
+  box-shadow: 0 0 14px rgba(200, 164, 75, 0.28);
+  border-radius: 4px;
+}
+
+.qi-meter-note {
+  flex: 0 0 auto;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--paper-dim);
+  white-space: nowrap;
+}
+
+.qi-meter-note b {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ---- 山河修行路线图 ---- */
+#roadmap {
+  min-height: 0;
+}
+
+.map-scroll {
+  position: relative;
+  margin: 2px 0 8px;
+  min-height: 360px;
+}
+
+.map-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.map-seg {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 1.6;
+}
+
+.map-seg.locked {
+  stroke: rgba(233, 225, 204, 0.13);
+}
+
+.map-seg.done {
+  stroke: rgba(200, 164, 75, 0.72);
+  filter: drop-shadow(0 0 3px rgba(200, 164, 75, 0.22));
+}
+
+.map-seg.current {
+  stroke: rgba(200, 164, 75, 0.42);
+  animation: segPulse 2.2s ease-in-out infinite;
+}
+
+.map-seg.just-lit {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: segFlow 0.8s ease-out forwards;
+}
+
+@keyframes segFlow {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes segPulse {
+  0%,
+  100% {
+    stroke-opacity: 0.35;
+  }
+  50% {
+    stroke-opacity: 0.9;
+  }
+}
+
+.map-node {
+  position: absolute;
+  left: 0;
+  right: 2px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 0;
+  background: transparent;
+  color: var(--paper-dim);
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 0;
+  line-height: 1.45;
+  cursor: default;
+}
+
+.map-seal {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(233, 225, 204, 0.2);
+  background: radial-gradient(circle at 35% 28%, rgba(233, 225, 204, 0.07), rgba(5, 4, 3, 0.4) 74%);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  transition: transform 0.18s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  will-change: transform;
+}
+
+.map-label {
+  min-width: 0;
+}
+
+.map-label small {
+  display: block;
+  font-size: 11px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+  opacity: 0.85;
+  margin-top: 1px;
+}
+
+/* done：朱印方印 + 金边 + 光晕呼吸 */
+.map-node.done {
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.map-node.done .map-seal {
+  border-radius: 4px;
+  border: 1px solid rgba(240, 210, 140, 0.75);
+  background: linear-gradient(150deg, #bd4938 0%, #8f2f24 100%);
+  color: #f3e6d0;
+  font-size: 17px;
+  box-shadow: 0 0 11px rgba(169, 58, 45, 0.42);
+  transform: rotate(-3deg);
+  animation: doneSealBreathe 3.4s ease-in-out infinite;
+}
+
+@keyframes doneSealBreathe {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(169, 58, 45, 0.32);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(200, 164, 75, 0.45), 0 0 8px rgba(169, 58, 45, 0.4);
+  }
+}
+
+/* current：金圈脉动 + 微浮动 */
+.map-node.current {
+  color: var(--gold);
+  cursor: pointer;
+}
+
+.map-node.current .map-seal {
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  background: radial-gradient(circle at 35% 28%, rgba(255, 235, 180, 0.14), rgba(60, 46, 20, 0.65) 74%);
+  box-shadow: 0 0 0 5px rgba(200, 164, 75, 0.07), 0 0 16px rgba(200, 164, 75, 0.34);
+  animation: nodeFloat 2.3s ease-in-out infinite;
+}
+
+@keyframes nodeFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 4px rgba(200, 164, 75, 0.05), 0 0 12px rgba(200, 164, 75, 0.28);
+  }
+  50% {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 8px rgba(200, 164, 75, 0.1), 0 0 22px rgba(200, 164, 75, 0.48);
+  }
+}
+
+/* locked：灰暗 + 云雾遮罩 */
+.map-node.locked .map-seal {
+  border-color: rgba(233, 225, 204, 0.16);
+  color: rgba(233, 225, 204, 0.4);
+  background: linear-gradient(180deg, rgba(80, 82, 74, 0.14), rgba(6, 6, 5, 0.42));
+}
+
+.map-node.done:hover .map-seal,
+.map-node.current:hover .map-seal {
+  transform: scale(1.1) rotate(-3deg);
+}
+
+.map-node.done:hover .map-label,
+.map-node.current:hover .map-label {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(200, 164, 75, 0.18);
+}
+
+/* ---- 行囊面板（右侧滑出 overlay） ---- */
+#bagMask {
+  position: fixed;
+  inset: 0;
+  z-index: 1450;
+  background: rgba(5, 4, 3, 0.58);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.24s ease, visibility 0.24s ease;
+}
+
+body.is-bag-open #bagMask {
+  opacity: 1;
+  visibility: visible;
+}
+
+#bagPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(340px, 100vw);
+  z-index: 1500;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(200, 164, 75, 0.10), transparent 58%),
+    linear-gradient(180deg, rgba(20, 17, 12, 0.97), rgba(9, 7, 5, 0.99));
+  border-left: 1px solid var(--line-gold);
+  box-shadow: -22px 0 60px rgba(0, 0, 0, 0.55);
+  transform: translateX(102%);
+  transition: transform 0.3s cubic-bezier(0.62, 0, 0.24, 1);
+}
+
+body.is-bag-open #bagPanel {
+  transform: translateX(0);
+}
+
+.bag-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 20px 18px 14px;
+  border-bottom: 1px dashed var(--line-paper);
+}
+
+.bag-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  letter-spacing: 4px;
+  color: var(--gold);
+}
+
+.bag-sub {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+}
+
+.bag-stones {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid rgba(200, 164, 75, 0.35);
+  border-radius: 12px;
+  background: rgba(200, 164, 75, 0.10);
+  color: #efd9a8;
+  font-size: 12px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.bag-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px 0;
+  border-bottom: 1px solid var(--line-paper);
+}
+
+.bag-tab {
+  flex: 1;
+  padding: 8px 4px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--paper-dim);
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: color 0.18s, border-color 0.18s;
+}
+
+.bag-tab[aria-selected="true"] {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.bag-tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.bag-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px 20px;
+}
+
+.bag-close {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-paper);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--paper-dim);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.bag-close:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.pet-list,
+.artifact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pet-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 11px;
+  align-items: center;
+  border: 1px solid rgba(233, 225, 204, 0.11);
+  border-left: 2px solid rgba(200, 164, 75, 0.28);
+  border-radius: 5px;
+  background: rgba(233, 225, 204, 0.035);
+  padding: 10px 11px;
+}
+
+.pet-item.obtained {
+  animation: petBob 3.8s ease-in-out infinite;
+}
+
+@keyframes petBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.pet-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-gold);
+  background: radial-gradient(circle at 36% 28%, rgba(255, 235, 180, 0.12), rgba(4, 3, 2, 0.55) 74%);
+  overflow: hidden;
+}
+
+.pet-icon svg {
+  width: 38px;
+  height: 38px;
+  display: block;
+}
+
+.pet-item.locked .pet-icon {
+  border-style: dashed;
+  opacity: 0.6;
+  filter: grayscale(0.8) brightness(0.7);
+}
+
+.pet-main {
+  min-width: 0;
+}
+
+.pet-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pet-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--paper);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pet-stage {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--gold);
+  border: 1px solid rgba(200, 164, 75, 0.35);
+  padding: 0 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.pet-topic {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+}
+
+.pet-grow {
+  position: relative;
+  height: 5px;
+  margin-top: 7px;
+  border-radius: 3px;
+  background: rgba(233, 225, 204, 0.08);
+  overflow: hidden;
+}
+
+.pet-grow i {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #a8832f, #e5c46a);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pet-grow-num {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+}
+
+.pet-acts {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.pet-acts .btn {
+  white-space: nowrap;
+  min-width: 76px;
+}
+
+.pet-groups {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 1px;
+}
+
+.grp-chip {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--paper-dim);
+  border: 1px solid rgba(233, 225, 204, 0.13);
+  border-radius: 9px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+
+.grp-chip.open {
+  color: rgba(143, 211, 196, 0.9);
+  border-color: rgba(143, 211, 196, 0.35);
+}
+
+.grp-chip.passed {
+  color: var(--gold);
+  border-color: rgba(200, 164, 75, 0.5);
+}
+
+.pet-tip {
+  grid-column: 2 / -1;
+  font-size: 11px;
+  color: var(--paper-dim);
+  line-height: 1.6;
+}
+
+.artifact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.artifact-item {
+  border: 1px solid rgba(233, 225, 204, 0.11);
+  border-radius: 5px;
+  background: rgba(233, 225, 204, 0.03);
+  padding: 10px;
+  text-align: center;
+}
+
+.artifact-item .art-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-gold);
+  background: radial-gradient(circle at 35% 28%, rgba(255, 235, 180, 0.1), rgba(4, 3, 2, 0.5) 75%);
+}
+
+.artifact-item .art-icon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.artifact-item.locked {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.artifact-item.locked .art-icon svg {
+  opacity: 0;
+}
+
+.art-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--paper);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.art-kind {
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.art-desc {
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--paper-dim);
+  line-height: 1.65;
+}
+
+.bag-empty {
+  text-align: center;
+  color: var(--paper-dim);
+  padding: 28px 12px;
+  line-height: 2;
+  font-size: 13px;
+}
+
+/* ---- 灵宠操练 / 升阶 overlay ---- */
+#practiceBox {
+  position: fixed;
+  inset: 0;
+  z-index: 1550;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 3, 2, 0.68);
+  padding: 14px;
+}
+
+#practiceBox[hidden] {
+  display: none;
+}
+
+.practice-card {
+  width: min(860px, 100%);
+  max-height: 94vh;
+  overflow-y: auto;
+}
+
+.practice-head {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 16px;
+}
+
+.practice-head .pet-icon {
+  width: 46px;
+  height: 46px;
+}
+
+.practice-head .pet-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.practice-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--paper);
+  letter-spacing: 2px;
+}
+
+.practice-group {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.practice-progress {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--paper-dim);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.practice-progress b {
+  color: var(--gold);
+  font-size: 18px;
+}
+
+.practice-exit {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+}
+
+.practice-card .practice-exit {
+  position: static;
+}
+
+.practice-summary {
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+.practice-summary .finale-seal {
+  width: 58px;
+  height: 58px;
+  line-height: 58px;
+  font-size: 27px;
+}
+
+.pet-evo {
+  position: fixed;
+  inset: 0;
+  z-index: 1560;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: radial-gradient(60% 50% at 50% 50%, rgba(200, 164, 75, 0.18), transparent 68%);
+}
+
+.pet-evo[hidden] {
+  display: none;
+}
+
+.pet-evo-inner {
+  text-align: center;
+  animation: evoIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pet-evo .pet-icon {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 16px;
+  border-color: var(--gold);
+  box-shadow: 0 0 30px rgba(200, 164, 75, 0.5);
+}
+
+.pet-evo .pet-icon svg {
+  width: 70px;
+  height: 70px;
+}
+
+.pet-evo-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 5px;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(200, 164, 75, 0.65);
+}
+
+.pet-evo-sub {
+  margin-top: 9px;
+  font-size: 13px;
+  color: var(--paper-dim);
+  letter-spacing: 2px;
+}
+
+@keyframes evoIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(12px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---- E 立绘槽位（结构占位；未来 assets/portraits/<who>.svg 自动生效） ---- */
+.dialog-item.has-portrait {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.dialog-item.has-portrait .dialog-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.portrait-slot {
+  position: relative;
+  flex: 0 0 66px;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(200, 164, 75, 0.3);
+  background: radial-gradient(circle at 36% 28%, rgba(233, 225, 204, 0.09), rgba(5, 4, 3, 0.8) 74%);
+  box-shadow:
+    inset 0 0 16px rgba(0, 0, 0, 0.55),
+    0 0 9px rgba(200, 164, 75, 0.09);
+  animation: portraitFloat 3.6s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.portrait-slot::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 164, 75, 0.16);
+  pointer-events: none;
+}
+
+.portrait-seal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: rgba(240, 230, 210, 0.84);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  background:
+    radial-gradient(circle at 50% 44%, rgba(200, 164, 75, 0.12), transparent 62%);
+}
+
+.portrait-slot img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes portraitFloat {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+/* ---- 移动端：行囊面板 / 立绘 / 路线图微调 ---- */
+@media (max-width: 640px) {
+  .dialog-item.has-portrait {
+    gap: 10px;
+  }
+
+  .portrait-slot {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .portrait-seal {
+    font-size: 18px;
+  }
+
+  .portrait-slot::after {
+    inset: 3px;
+  }
+
+  .map-node {
+    gap: 11px;
+  }
+
+  .map-label {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shake,
+  .zoom-pulse,
+  .ink-ripple,
+  .ink-splat,
+  .map-node.done .map-seal,
+  .map-node.current .map-seal,
+  .map-seg.just-lit,
+  .realm-glow::after,
+  .pet-item.obtained,
+  .portrait-slot {
+    animation: none !important;
+  }
+
+  #ripples {
+    display: none;
+  }
+}
+
+/* 侧栏入口的灵石小徽章 */
+.bag-stone-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: linear-gradient(150deg, #d8ad54, #8f6c22);
+  color: #211505;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* ============================================================
+   i2-1 场景动态化 + 手感细节
+   ============================================================ */
+
+/* ---- 全屏 Canvas 粒子层（fixed、pointer-events:none） ---- */
+#fxParticles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* ---- 点击墨色涟漪层 ---- */
+#ripples {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ink-ripple {
+  position: fixed;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  border-radius: 50%;
+  border: 1px solid rgba(233, 225, 204, 0.30);
+  background: radial-gradient(circle, rgba(200, 164, 75, 0.10) 0%, rgba(200, 164, 75, 0.03) 36%, rgba(200, 164, 75, 0) 68%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: inkRipple 0.4s ease-out forwards;
+}
+
+@keyframes inkRipple {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.26);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+/* ---- 云海 / 远山：20-60s 缓慢漂移 + opacity 呼吸（幅度 <=0.06） ---- */
+:root {
+  --cloud-x-a: -1.5%;
+  --cloud-x-b: 1.5%;
+  --cloud-op-a: 0.59;
+  --cloud-op-b: 0.65;
+  --cloud-dur: 34s;
+  --far-x-a: -0.35%;
+  --far-x-b: 0.35%;
+  --far-op-a: 0.94;
+  --far-op-b: 1;
+  --far-dur: 44s;
+}
+
+:root[data-scene="1"] {
+  --cloud-dur: 46s;
+  --cloud-op-a: 0.58;
+  --cloud-op-b: 0.64;
+  --far-dur: 52s;
+}
+
+:root[data-scene="2"] {
+  --cloud-dur: 26s;
+  --cloud-op-a: 0.60;
+  --cloud-op-b: 0.66;
+  --far-dur: 30s;
+}
+
+:root[data-scene="3"] {
+  --cloud-dur: 36s;
+  --cloud-op-a: 0.59;
+  --cloud-op-b: 0.65;
+  --far-dur: 42s;
+}
+
+:root[data-scene="4"] {
+  --cloud-dur: 30s;
+  --cloud-op-a: 0.61;
+  --cloud-op-b: 0.67;
+  --far-dur: 36s;
+}
+
+:root[data-scene="5"] {
+  --cloud-dur: 40s;
+  --cloud-op-a: 0.58;
+  --cloud-op-b: 0.63;
+  --far-dur: 48s;
+}
+
+:root[data-scene="6"] {
+  --cloud-dur: 20s;
+  --cloud-op-a: 0.63;
+  --cloud-op-b: 0.68;
+  --far-dur: 24s;
+}
+
+:root[data-scene="7"] {
+  --cloud-dur: 32s;
+  --cloud-op-a: 0.60;
+  --cloud-op-b: 0.66;
+  --far-dur: 38s;
+}
+
+.scene-clouds {
+  animation: cloudBreath var(--cloud-dur) ease-in-out infinite alternate;
+}
+
+.scene-far {
+  animation: farBreath var(--far-dur) ease-in-out infinite alternate;
+}
+
+@keyframes cloudBreath {
+  from {
+    transform: translateX(var(--cloud-x-a));
+    opacity: var(--cloud-op-a);
+  }
+  to {
+    transform: translateX(var(--cloud-x-b));
+    opacity: var(--cloud-op-b);
+  }
+}
+
+@keyframes farBreath {
+  from {
+    transform: translateX(var(--far-x-a));
+    opacity: var(--far-op-a);
+  }
+  to {
+    transform: translateX(var(--far-x-b));
+    opacity: var(--far-op-b);
+  }
+}
+
+/* ---- 分层视差（桌面 pointer:fine；translate 属性与动画 transform 可叠加） ---- */
+@media (pointer: fine) {
+  .scene-far {
+    /* 远山 0.6 */
+    translate: calc(var(--px, 0) * 14px) calc(var(--py, 0) * 7px + var(--bg-drift-y, 0px));
+  }
+
+  .scene-clouds {
+    /* 云海 0.8 */
+    translate: calc(var(--px, 0) * 18px) calc(var(--py, 0) * 9px + var(--bg-drift-y, 0px));
+  }
+
+  .scene-beams {
+    translate: calc(var(--px, 0) * 14px) calc(var(--py, 0) * 7px + var(--bg-drift-y, 0px));
+  }
+
+  .scene-fog-a,
+  .scene-fog-b {
+    /* 近景雾 1.2 */
+    translate: calc(var(--px, 0) * 24px) calc(var(--py, 0) * 12px);
+  }
+
+  .env-art {
+    /* 场景画近景 1.2（不参与整页滚动缓移，避免露出边缘） */
+    translate: calc(var(--px, 0) * 26px) calc(var(--py, 0) * 13px);
+  }
+}
+
+/* ---- 光源写实：暖光烛火摇曳 / 月光呼吸 ---- */
+.scene-light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+:root[data-scene="1"] .scene-light::after {
+  /* 纹谱阁油灯（.scene-light 盒子 inset:-20%，坐标经换算后落在灯区） */
+  opacity: 1;
+  background: radial-gradient(
+    13% 12% at 70% 76%,
+    rgba(255, 203, 128, 0.20),
+    rgba(255, 178, 94, 0.07) 48%,
+    transparent 74%
+  );
+  filter: blur(16px);
+  transform-origin: 70% 76%;
+  animation: flameFlicker 4.6s ease-in-out infinite;
+}
+
+:root[data-scene="3"] .scene-light::after {
+  /* 测纹处牌坊两盏灯笼 */
+  opacity: 1;
+  background:
+    radial-gradient(9% 11% at 46% 59%, rgba(255, 205, 122, 0.20), rgba(255, 182, 96, 0.06) 50%, transparent 74%),
+    radial-gradient(9% 11% at 54% 59%, rgba(255, 205, 122, 0.20), rgba(255, 182, 96, 0.06) 50%, transparent 74%);
+  filter: blur(14px);
+  transform-origin: 50% 59%;
+  animation: flameFlicker 5.2s ease-in-out infinite;
+}
+
+:root[data-scene="5"] .scene-light::after {
+  /* 夜枭谷弯月（月光极慢呼吸，不重复雷闪体系） */
+  opacity: 1;
+  background: radial-gradient(
+    10% 9% at 68% 29%,
+    rgba(255, 235, 205, 0.16),
+    rgba(255, 235, 205, 0.05) 52%,
+    transparent 76%
+  );
+  filter: blur(15px);
+  transform-origin: 68% 29%;
+  animation: moonBreath 8.5s ease-in-out infinite alternate;
+}
+
+@keyframes flameFlicker {
+  0%,
+  100% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+  7% {
+    opacity: 0.95;
+    transform: scale(1.07) translate(0.3%, -0.4%);
+  }
+  14% {
+    opacity: 0.74;
+    transform: scale(0.97);
+  }
+  24% {
+    opacity: 1;
+    transform: scale(1.12) translate(-0.4%, -0.7%);
+  }
+  33% {
+    opacity: 0.85;
+    transform: scale(1.02) translate(0.2%, 0.2%);
+  }
+  47% {
+    opacity: 0.66;
+    transform: scale(0.94) translate(-0.3%, 0);
+  }
+  58% {
+    opacity: 0.96;
+    transform: scale(1.09) translate(0.2%, -0.5%);
+  }
+  70% {
+    opacity: 0.78;
+    transform: scale(0.99);
+  }
+  84% {
+    opacity: 0.9;
+    transform: scale(1.05) translate(0.3%, -0.2%);
+  }
+  94% {
+    opacity: 0.72;
+    transform: scale(0.96) translate(-0.2%, 0.1%);
+  }
+}
+
+@keyframes moonBreath {
+  from {
+    opacity: 0.5;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 0.82;
+    transform: scale(1.04);
+  }
+}
+
+/* ---- 境界 HUD：金色流光 + 破境拓印浮现 ---- */
+#heroTip .realm-cell {
+  position: relative;
+  display: inline-block;
+  padding: 0 2px;
+}
+
+#heroTip .realm-glow {
+  background: linear-gradient(90deg, #a99d80 0%, #cfc19b 30%, #e9cc7c 50%, #cfc19b 70%, #a99d80 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: realmShimmer 6.5s linear infinite;
+}
+
+@keyframes realmShimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+#heroTip.stamping .realm-cell {
+  animation: realmStamp 1s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+#heroTip.stamping .realm-cell::after {
+  content: "";
+  position: absolute;
+  inset: -5px -8px;
+  pointer-events: none;
+  border: 1px solid rgba(169, 58, 45, 0);
+  animation: realmSealFlash 1s ease-out both;
+}
+
+@keyframes realmStamp {
+  0% {
+    opacity: 0.15;
+    transform: scale(1.12);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes realmSealFlash {
+  0% {
+    border-color: rgba(169, 58, 45, 0);
+    box-shadow: 0 0 0 rgba(169, 58, 45, 0);
+  }
+  26% {
+    border-color: rgba(199, 71, 54, 0.8);
+    box-shadow: 0 0 10px rgba(169, 58, 45, 0.35);
+  }
+  100% {
+    border-color: rgba(169, 58, 45, 0);
+    box-shadow: 0 0 0 rgba(169, 58, 45, 0);
+  }
+}
+
+/* ---- 自定义光标：金色灵纹/笔尖（仅桌面 pointer:fine；输入区保留文本光标） ---- */
+@media (pointer: fine) {
+  body,
+  button,
+  .btn,
+  .opt,
+  .road-node,
+  a,
+  [role="button"],
+  [tabindex] {
+    cursor: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2016%2016'%3E%3Ccircle%20cx='7.5'%20cy='8'%20r='5.6'%20fill='none'%20stroke='%23c8a44b'%20stroke-width='1.1'/%3E%3Cpath%20d='M2.4%202.6c1.5%202%203.4%203.5%205.1%204.4'%20fill='none'%20stroke='%23ecd9a8'%20stroke-width='1'/%3E%3Ccircle%20cx='7.5'%20cy='8'%20r='1.5'%20fill='%23c8a44b'/%3E%3C/svg%3E") 8 8, auto;
+  }
+
+  textarea,
+  input,
+  select {
+    cursor: text;
+  }
+}
+
+/* ---- i2-1 收尾：reduced-motion 全面降级为静态/极简 ---- */
+@media (prefers-reduced-motion: reduce) {
+  #fxParticles,
+  #ripples {
+    display: none !important;
+  }
+
+  .scene-far,
+  .scene-clouds,
+  .scene-beams,
+  .scene-fog-a,
+  .scene-fog-b,
+  .env-art {
+    translate: none !important;
+  }
+
+  .scene-far,
+  .scene-clouds {
+    animation: none !important;
+  }
+
+  .scene-light::after {
+    opacity: 0 !important;
+    animation: none !important;
+  }
+
+  .realm-glow {
+    background: none !important;
+    color: #cfc19b !important;
+    animation: none !important;
+  }
+
+  #heroTip .realm-cell {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  #heroTip .realm-cell::after {
+    display: none !important;
   }
 }

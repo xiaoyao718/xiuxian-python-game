@@ -34,6 +34,11 @@
             <span>小师妹的笔记本</span>
             <span class="mistake-count" id="mistakeCount" aria-label="错题数量"></span>
           </button>
+          <button class="btn ghost small side-btn" id="btnBag" type="button"
+            aria-haspopup="dialog" aria-controls="bagPanel" title="灵宠 · 行囊">
+            <span>灵宠 · 行囊</span>
+            <span class="bag-stone-num" id="bagStones" aria-label="灵石数量"></span>
+          </button>
           <button class="btn ghost small side-btn" id="btnSound" type="button"
             aria-pressed="true" title="音效：开（点击关闭）">
             <svg class="snd-ico" data-ico="on" viewBox="0 0 24 24" aria-hidden="true">
@@ -70,7 +75,26 @@
     <div class="scene-vignette"></div>
     <div class="scene-flash"></div>
   </div>
-  <div id="motes" aria-hidden="true"></div>
+  <canvas id="fxParticles" aria-hidden="true"></canvas>
+  <div id="ripples" aria-hidden="true"></div>
+  <div id="bagMask" aria-hidden="true"></div>
+  <aside id="bagPanel" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="bag-head">
+      <div>
+        <div class="bag-title">灵宠 · 行囊</div>
+        <div class="bag-sub">以练促养 · 灵石只计不花</div>
+      </div>
+      <span class="bag-stones" title="灵石（暂不消费）">灵石 <b id="bagStoneCount">0</b></span>
+      <button class="bag-close" id="bagClose" type="button" aria-label="关闭行囊">×</button>
+    </div>
+    <div class="bag-tabs" role="tablist" aria-label="行囊分类">
+      <button class="bag-tab" data-page="pets" role="tab" aria-selected="true" type="button">灵宠</button>
+      <button class="bag-tab" data-page="artifacts" role="tab" aria-selected="false" type="button">灵器</button>
+    </div>
+    <div class="bag-body" id="bagBody"></div>
+  </aside>
+  <div id="practiceBox" hidden role="dialog" aria-modal="true"></div>
+  <div class="pet-evo" id="petEvo" hidden aria-hidden="true"></div>
   <div id="fx" class="fx-hidden"></div>
   <div id="sceneFade" aria-hidden="true"></div>
   <div id="flashHit" aria-hidden="true"></div>
@@ -78,5 +102,7 @@
   <script src="js/game.js"></script>
   <script src="js/sound.js"></script>
   <script src="js/runner.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/pet.js"></script>
 </body>
 </html>

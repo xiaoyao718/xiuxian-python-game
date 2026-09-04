@@ -70,6 +70,7 @@
         // 个别浏览器拒绝恢复时静默
       }
     }
+    startAmbientIfPossible();
     return ctx;
   }
 
@@ -220,13 +221,32 @@
     o2.stop(t0 + 0.07);
   }
 
+  // 灵宠升阶：短促上行琶音（C5 E5 G5 C6），明亮雀跃
+  function playLevelup(ac) {
+    var t0 = ac.currentTime;
+    var notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach(function (f, i) {
+      var g = envelope(ac, t0 + i * 0.055, 0.12, 0.004, 0.34);
+      var o = ac.createOscillator();
+      o.type = "triangle";
+      o.frequency.value = f;
+      o.connect(g);
+      g.connect(master);
+      o.start(t0 + i * 0.055);
+      o.stop(t0 + i * 0.055 + 0.4);
+      // 加一道极轻的磬音泛音，灵性更足
+      bell(ac, f * 2, t0 + i * 0.055, 0.03, 0.32);
+    });
+  }
+
   var SOUNDS = {
     click: playClick,
     right: playRight,
     wrong: playWrong,
     breakthrough: playBreakthrough,
     thunder: playThunder,
-    seal: playSeal
+    seal: playSeal,
+    levelup: playLevelup
   };
 
   function play(name) {
@@ -239,6 +259,174 @@
     } catch (e) {
       // 单次合成失败不影响后续
     }
+  }
+
+  // ---------- 场景环境音（i2-1：极轻滤噪底噪，宁缺毋滥只留两档） ----------
+  // scene5 夜枭谷：夜风；scene6 渡劫：风雨。其余场景保持静默，
+  // 避免廉价底噪反而破坏氛围。音量一律 -28dB 上下，可随主音效开关静默。
+  var ambient = null; // { scene, layers:[{gain,stops}], timer }
+  var ambScene = -1;
+
+  function ambientCurrentScene() {
+    var n = Number(document.documentElement.getAttribute("data-scene"));
+    return isFinite(n) ? n : -1;
+  }
+
+  function ambientRecipe(scene) {
+    if (scene === 5) {
+      // 夜风：低通噪声 + 0.08Hz 缓慢起伏（风声“呼吸”感）
+      return [
+        {
+          type: "lowpass",
+          freq: 330,
+          q: 0.7,
+          gain: 0.045,
+          lfoHz: 0.08,
+          lfoDepth: 150,
+          lfoGain: 0.013
+        }
+      ];
+    }
+    if (scene === 6) {
+      // 风雨：低闷风声 + 一点中高频雨噪（雨丝视觉仍由 CSS 负责）
+      return [
+        {
+          type: "lowpass",
+          freq: 190,
+          q: 0.55,
+          gain: 0.038,
+          lfoHz: 0.11,
+          lfoDepth: 110,
+          lfoGain: 0.011
+        },
+        {
+          type: "bandpass",
+          freq: 1750,
+          q: 0.85,
+          gain: 0.014,
+          lfoHz: 0.27,
+          lfoDepth: 260,
+          lfoGain: 0.004
+        }
+      ];
+    }
+    return null;
+  }
+
+  function buildAmbLayer(ac, cfg) {
+    var src = ac.createBufferSource();
+    src.buffer = noiseBuffer(ac);
+    src.loop = true;
+    var filt = ac.createBiquadFilter();
+    filt.type = cfg.type || "lowpass";
+    filt.frequency.value = cfg.freq;
+    filt.Q.value = cfg.q || 0.8;
+    var gain = ac.createGain();
+    gain.gain.value = 0.0001;
+    src.connect(filt);
+    filt.connect(gain);
+    gain.connect(master);
+    src.start();
+    var stops = [src];
+    if (cfg.lfoHz && cfg.lfoDepth > 0) {
+      var lfo = ac.createOscillator();
+      lfo.frequency.value = cfg.lfoHz;
+      var depth = ac.createGain();
+      depth.gain.value = cfg.lfoDepth;
+      lfo.connect(depth);
+      depth.connect(filt.frequency);
+      lfo.start();
+      stops.push(lfo);
+    }
+    if (cfg.lfoGain) {
+      var glfo = ac.createOscillator();
+      glfo.frequency.value = cfg.lfoHz ? cfg.lfoHz * 0.7 : 0.05;
+      var gDepth = ac.createGain();
+      gDepth.gain.value = cfg.lfoGain;
+      glfo.connect(gDepth);
+      gDepth.connect(gain.gain);
+      glfo.start();
+      stops.push(glfo);
+    }
+    return { gain: gain, stops: stops };
+  }
+
+  function stopAmbientGroup(group, delayMs) {
+    if (!group) return;
+    if (group.timer) window.clearTimeout(group.timer);
+    group.timer = window.setTimeout(function () {
+      try {
+        group.layers.forEach(function (l) {
+          l.stops.forEach(function (s) {
+            try {
+              s.stop();
+            } catch (e) {
+              // 已停止则忽略
+            }
+          });
+        });
+      } catch (e) {
+        // 忽略
+      }
+    }, delayMs);
+  }
+
+  // 交叉淡入淡出（约 1.5s）：旧组淡出并自毁，新组从静音淡入
+  function startAmbient(scene) {
+    if (ambient && ambient.scene === scene) return;
+    var recipe = ambientRecipe(scene);
+    var old = ambient;
+    ambient = null;
+    if (old && ctx) {
+      try {
+        var t0 = ctx.currentTime;
+        old.layers.forEach(function (l) {
+          l.gain.gain.cancelScheduledValues(t0);
+          l.gain.gain.setValueAtTime(Math.max(l.gain.gain.value, 0.0001), t0);
+          l.gain.gain.linearRampToValueAtTime(0.0001, t0 + 1.5);
+        });
+        stopAmbientGroup(old, 1700);
+      } catch (e) {
+        // 忽略
+      }
+    }
+    if (!recipe || !ctx || !enabled) return;
+    try {
+      var ac = ctx;
+      var t1 = ac.currentTime;
+      var layers = recipe.map(function (cfg) {
+        var l = buildAmbLayer(ac, cfg);
+        l.gain.gain.cancelScheduledValues(t1);
+        l.gain.gain.setValueAtTime(0.0001, t1);
+        l.gain.gain.linearRampToValueAtTime(cfg.gain, t1 + 1.5);
+        return l;
+      });
+      ambient = { scene: scene, layers: layers, timer: null };
+    } catch (e) {
+      // 环境音合成失败时静默降级，绝不影响主流程
+    }
+  }
+
+  function startAmbientIfPossible() {
+    if (!ctx || !enabled || !master) return;
+    if (!ambient) startAmbient(ambScene);
+  }
+
+  // 主音效关闭：环境音快速收掉（0.35s），不保留后台发声
+  function muteAmbient() {
+    if (!ambient || !ctx) return;
+    try {
+      var t0 = ctx.currentTime;
+      ambient.layers.forEach(function (l) {
+        l.gain.gain.cancelScheduledValues(t0);
+        l.gain.gain.setValueAtTime(Math.max(l.gain.gain.value, 0.0001), t0);
+        l.gain.gain.linearRampToValueAtTime(0.0001, t0 + 0.35);
+      });
+      stopAmbientGroup(ambient, 600);
+    } catch (e) {
+      // 忽略
+    }
+    ambient = null;
   }
 
   // ---------- 喇叭按钮 UI ----------
@@ -278,6 +466,9 @@
     enabled = !!on;
     persistSetting();
     syncUI();
+    if (!enabled) {
+      muteAmbient();
+    }
     if (master && ctx) {
       try {
         master.gain.cancelScheduledValues(ctx.currentTime);
@@ -293,9 +484,16 @@
         // 忽略
       }
     }
+    if (enabled) startAmbientIfPossible();
   };
 
   window.App.sfx = play;
+  // 场景环境音入口：game/fx 层或 data-scene 监听均可调用（重复调用同一场景为 no-op）
+  window.App.setSceneAudio = function (sceneN) {
+    const n = Number(sceneN);
+    ambScene = isFinite(n) ? n : -1;
+    if (ctx && enabled && master) startAmbient(n);
+  };
   window.App.isSoundOn = function () {
     return enabled;
   };
@@ -310,4 +508,16 @@
   }
   document.addEventListener("click", onDocClick);
   syncUI();
+
+  // 初始场景 + 场景切换（约 1.5s 交叉淡入淡出环境音）
+  ambScene = ambientCurrentScene();
+  if (window.MutationObserver && document.documentElement) {
+    new MutationObserver(function () {
+      const v = ambientCurrentScene();
+      if (v >= 0) window.App.setSceneAudio(v);
+    }).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-scene"]
+    });
+  }
 })();
