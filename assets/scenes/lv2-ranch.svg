@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#24352d"/>
+      <stop offset="0.55" stop-color="#16241e"/>
+      <stop offset="1" stop-color="#0b120e"/>
+    </linearGradient>
+    <radialGradient id="qiGlow2" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#c9f0e2" stop-opacity="0.46"/>
+      <stop offset="0.62" stop-color="#8fd3c4" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#8fd3c4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="warm2" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f2d9a6" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#f2d9a6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft2" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="420" fill="url(#sky2)"/>
+
+  <!-- 晨光与灵雾 -->
+  <ellipse cx="690" cy="150" rx="330" ry="215" fill="url(#qiGlow2)"/>
+  <ellipse cx="706" cy="92" rx="100" ry="36" fill="url(#warm2)"/>
+
+  <!-- 远山 -->
+  <path d="M0 300 L92 236 L196 298 L322 202 L468 302 L612 224 L762 302 L884 238 L960 296 L960 420 L0 420 Z"
+        fill="#21342b" opacity="0.7"/>
+  <path d="M0 352 L142 286 L274 348 L432 256 L592 350 L732 288 L882 350 L960 312 L960 420 L0 420 Z"
+        fill="#14211b" opacity="0.92"/>
+
+  <!-- 草棚剪影 -->
+  <g fill="#0c1511" opacity="0.95">
+    <path d="M96 306 L148 258 L240 258 L292 306 L280 312 L240 272 L148 272 L108 312 Z"/>
+    <rect x="118" y="306" width="152" height="76"/>
+    <path d="M96 306 L292 306" stroke="#0a120e" stroke-width="5"/>
+    <path d="M158 310 L158 382 M230 310 L230 382" stroke="#0a120e" stroke-width="6"/>
+  </g>
+
+  <!-- 灵鹤飞影 -->
+  <g fill="#0e1713" opacity="0.9">
+    <path d="M258 138 q-4 -18 2 -34 q6 16 8 26 q-2 6 -10 8 Z"/>
+    <path d="M270 130 q14 -14 28 -10 q-16 2 -26 14 Z"/>
+    <ellipse cx="274" cy="144" rx="2.2" ry="7" transform="rotate(18 274 144)"/>
+    <path d="M334 170 q-3 -16 3 -30 q5 14 6 24 q-1 5 -9 6 Z"/>
+    <path d="M345 163 q12 -12 24 -8 q-14 1 -22 12 Z"/>
+    <ellipse cx="348" cy="176" rx="1.8" ry="6" transform="rotate(16 348 176)"/>
+  </g>
+
+  <!-- 苑栏 -->
+  <path d="M0 366 L330 366" stroke="#0a120e" stroke-width="4" opacity="0.9"/>
+  <path d="M0 380 L330 380" stroke="#0a120e" stroke-width="4" opacity="0.9"/>
+  <g stroke="#0a120e" stroke-width="5" opacity="0.92">
+    <path d="M36 358 L36 388"/>
+    <path d="M90 358 L90 388"/>
+    <path d="M144 358 L144 388"/>
+    <path d="M198 358 L198 388"/>
+    <path d="M252 358 L252 388"/>
+    <path d="M306 358 L306 388"/>
+  </g>
+
+  <!-- 白鹤伫立（剪影） -->
+  <g fill="#101a15">
+    <ellipse cx="104" cy="396" rx="11" ry="8"/>
+    <path d="M100 388 q-4 -26 0 -36 M108 388 q4 -24 8 -32" stroke="#101a15" stroke-width="2.5" fill="none"/>
+    <circle cx="100" cy="350" r="3"/>
+    <circle cx="116" cy="356" r="2.6"/>
+  </g>
+  <g fill="#101a15" opacity="0.9">
+    <ellipse cx="560" cy="398" rx="10" ry="7"/>
+    <path d="M556 391 q-4 -22 0 -31 M564 391 q4 -20 8 -28" stroke="#101a15" stroke-width="2.3" fill="none"/>
+    <circle cx="556" cy="358" r="2.6"/>
+  </g>
+
+  <!-- 薄雾 -->
+  <ellipse cx="220" cy="352" rx="360" ry="54" fill="#bfd9cc" opacity="0.10" filter="url(#soft2)"/>
+  <ellipse cx="760" cy="368" rx="330" ry="48" fill="#a9cbbb" opacity="0.09" filter="url(#soft2)"/>
+  <ellipse cx="480" cy="300" rx="520" ry="34" fill="#8fd3c4" opacity="0.055" filter="url(#soft2)"/>
+
+  <!-- 灵尘 -->
+  <g fill="#c9e8d8">
+    <circle cx="720" cy="226" r="2" opacity="0.75"/>
+    <circle cx="150" cy="190" r="1.6" opacity="0.5"/>
+    <circle cx="620" cy="290" r="1.8" opacity="0.5"/>
+    <circle cx="840" cy="150" r="1.5" opacity="0.45"/>
+    <circle cx="60" cy="250" r="1.5" opacity="0.45"/>
+  </g>
+  <g fill="#c8a44b">
+    <circle cx="812" cy="210" r="1.6" opacity="0.6"/>
+    <circle cx="120" cy="120" r="1.4" opacity="0.5"/>
+    <circle cx="420" cy="230" r="1.5" opacity="0.4"/>
+  </g>
+</svg>

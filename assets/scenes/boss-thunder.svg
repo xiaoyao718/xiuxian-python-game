@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="skyb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#05070d"/>
+      <stop offset="1" stop-color="#0e1220"/>
+    </linearGradient>
+    <radialGradient id="cloud" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#3a4657" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#1a2230" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softb" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="glowb" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+  <rect width="960" height="420" fill="url(#skyb)"/>
+
+  <!-- 雷云 -->
+  <ellipse cx="480" cy="70" rx="360" ry="120" fill="url(#cloud)" filter="url(#softb)"/>
+  <ellipse cx="330" cy="40" rx="200" ry="70" fill="#232e40" opacity="0.8"/>
+  <ellipse cx="640" cy="35" rx="190" ry="65" fill="#202a3b" opacity="0.75"/>
+  <ellipse cx="480" cy="90" rx="300" ry="80" fill="#1a2230" opacity="0.85"/>
+
+  <!-- 远处群山与地面 -->
+  <path d="M0 330 L130 260 L260 340 L420 250 L580 345 L760 270 L960 350 L960 420 L0 420 Z"
+        fill="#05080f" opacity="0.95"/>
+  <rect x="0" y="390" width="960" height="30" fill="#03050a"/>
+
+  <!-- 劈落的雷 -->
+  <polyline points="430,110 520,170 460,180 560,240 505,250 600,315"
+            fill="none" stroke="#fff3cf" stroke-width="5" filter="url(#glowb)" opacity="0.9"/>
+  <polyline points="430,110 520,170 460,180 560,240 505,250 600,315"
+            fill="none" stroke="#ffe1a0" stroke-width="1.6"/>
+
+  <!-- 落雷光点 -->
+  <circle cx="600" cy="322" r="16" fill="#ffe1a0" opacity="0.5" filter="url(#glowb)"/>
+  <circle cx="600" cy="322" r="4" fill="#fff6df"/>
+
+  <!-- 雨线 -->
+  <g stroke="#8fd3c4" stroke-width="1" opacity="0.12">
+    <line x1="180" y1="140" x2="160" y2="200"/>
+    <line x1="260" y1="150" x2="240" y2="215"/>
+    <line x1="350" y1="160" x2="325" y2="230"/>
+    <line x1="700" y1="150" x2="680" y2="215"/>
+    <line x1="790" y1="160" x2="768" y2="230"/>
+    <line x1="850" y1="140" x2="832" y2="200"/>
+  </g>
+
+  <!-- 渡劫的林慕 -->
+  <g fill="#01030a">
+    <ellipse cx="600" cy="396" rx="14" ry="22"/>
+    <circle cx="600" cy="366" r="7"/>
+  </g>
+
+  <!-- 地面金光折射 -->
+  <ellipse cx="600" cy="392" rx="90" ry="8" fill="#c8a44b" opacity="0.18" filter="url(#glowb)"/>
+</svg>

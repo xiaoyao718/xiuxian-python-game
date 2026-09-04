@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1220"/>
+      <stop offset="1" stop-color="#182030"/>
+    </linearGradient>
+    <linearGradient id="goldpath" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#c8a44b" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#c8a44b" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#ffe1a0" stop-opacity="0.15"/>
+    </linearGradient>
+    <radialGradient id="moon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe9c8" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffe9c8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft5" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+  <rect width="960" height="420" fill="url(#sky5)"/>
+
+  <!-- 弯月 -->
+  <circle cx="720" cy="86" r="42" fill="url(#moon)" opacity="0.4"/>
+  <path d="M744 52 A34 34 0 1 0 744 120 A28 28 0 1 1 744 52 Z" fill="#f3e2bd"/>
+
+  <!-- 两壁山崖 -->
+  <path d="M0 130 L90 90 L230 190 L170 420 L0 420 Z" fill="#0a101c"/>
+  <path d="M300 420 L350 260 L520 240 L560 420 Z" fill="#0d1422" opacity="0.95"/>
+  <path d="M960 100 L860 130 L740 220 L820 420 L960 420 Z" fill="#0a101c"/>
+  <path d="M620 420 L680 300 L780 250 L840 420 Z" fill="#0d1422" opacity="0.9"/>
+
+  <!-- 幽谷金光 -->
+  <path d="M620 420 C600 360 520 330 500 290 C480 250 540 220 560 180 C575 150 550 120 600 100"
+        fill="none" stroke="url(#goldpath)" stroke-width="26" opacity="0.28" filter="url(#soft5)"/>
+  <path d="M620 420 C600 360 520 330 500 290 C480 250 540 220 560 180 C575 150 550 120 600 100"
+        fill="none" stroke="#ffe1a0" stroke-width="2" opacity="0.5" stroke-dasharray="10 12"/>
+
+  <!-- 妖狼的眼睛 -->
+  <g fill="#ff6b5e">
+    <circle cx="150" cy="250" r="2.6"/><circle cx="165" cy="252" r="2.6"/>
+    <circle cx="190" cy="300" r="2.2"/><circle cx="203" cy="300" r="2.2"/>
+    <circle cx="800" cy="270" r="2.6"/><circle cx="815" cy="272" r="2.6"/>
+    <circle cx="770" cy="330" r="2"/><circle cx="782" cy="328" r="2"/>
+  </g>
+
+  <!-- 林慕剪影 -->
+  <g fill="#04060a">
+    <ellipse cx="630" cy="398" rx="12" ry="20"/>
+    <circle cx="630" cy="372" r="6.5"/>
+    <path d="M622 388 L638 388" stroke="#c8a44b" stroke-width="2" opacity="0.8"/>
+  </g>
+
+  <!-- 山脚雾 -->
+  <ellipse cx="300" cy="390" rx="320" ry="46" fill="#76837a" opacity="0.12" filter="url(#soft5)"/>
+  <ellipse cx="680" cy="396" rx="300" ry="40" fill="#76837a" opacity="0.1" filter="url(#soft5)"/>
+</svg>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-env="cover">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>修仙学 Python · 仓绝大陆</title>
+  <meta name="description" content="《修仙学 Python》剧情闯关网页游戏·第一卷「仓绝初醒」：0 基础学习者随主角林慕，在仓绝大陆上一关关学会 print、变量、input、if 与 for，亲手写代码渡劫筑基。">
+  <meta name="theme-color" content="#0e0c09">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:title" content="修仙学 Python · 仓绝大陆">
+  <meta property="og:description" content="以 Python 入门的剧情闯关修仙游戏：卷1「仓绝初醒」，从 print 到筑基渡劫，边读故事边学代码。">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <button id="sideToggle" class="side-toggle" type="button"
+      aria-label="打开章节菜单" aria-controls="sidebar" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <aside id="sidebar">
+      <div class="side-head">
+        <div class="game-logo" id="gameLogo">修仙学 Python</div>
+        <div class="volume-name" id="volumeName"></div>
+      </div>
+      <div id="roadmap"></div>
+      <div class="side-foot">
+        <div class="side-actions">
+          <button class="btn ghost small side-btn" id="btnMistakes" type="button">
+            <span>小师妹的笔记本</span>
+            <span class="mistake-count" id="mistakeCount" aria-label="错题数量"></span>
+          </button>
+          <button class="btn ghost small side-btn" id="btnSound" type="button"
+            aria-pressed="true" title="音效：开（点击关闭）">
+            <svg class="snd-ico" data-ico="on" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9.5v5h3.4L12 18.2V5.8L7.4 9.5H4z"></path>
+              <path d="M15.2 9a4.8 4.8 0 0 1 0 6"></path>
+              <path d="M16.8 6.8a7.8 7.8 0 0 1 0 10.4"></path>
+            </svg>
+            <svg class="snd-ico" data-ico="off" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9.5v5h3.4L12 18.2V5.8L7.4 9.5H4z"></path>
+              <path d="M16.5 9.5l5 5M21.5 9.5l-5 5"></path>
+            </svg>
+            <span class="snd-label">音效</span>
+          </button>
+          <button class="btn ghost small side-btn" id="btnReset" type="button">重置进度</button>
+        </div>
+        <div class="tip" id="heroTip"></div>
+      </div>
+    </aside>
+    <div id="sideMask" aria-hidden="true"></div>
+    <main id="main">
+      <div class="stage-box" id="stageBox"></div>
+    </main>
+  </div>
+  <div id="atmosphere" aria-hidden="true">
+    <div class="scene-sky"></div>
+    <div class="scene-far"></div>
+    <div class="scene-clouds"></div>
+    <div class="env-art"></div>
+    <div class="scene-fog scene-fog-a"></div>
+    <div class="scene-fog scene-fog-b"></div>
+    <div class="scene-light"></div>
+    <div class="scene-beams"></div>
+    <div class="env-rain"></div>
+    <div class="scene-vignette"></div>
+    <div class="scene-flash"></div>
+  </div>
+  <div id="motes" aria-hidden="true"></div>
+  <div id="fx" class="fx-hidden"></div>
+  <div id="sceneFade" aria-hidden="true"></div>
+  <div id="flashHit" aria-hidden="true"></div>
+  <script src="js/data.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/runner.js"></script>
+</body>
+</html>

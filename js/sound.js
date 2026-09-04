@@ -1,0 +1,313 @@
+// ============================================================
+// WebAudio 合成音效模块（零外部音频资源，全部实时合成）
+// 依赖：window.App（game.js 提供），加载顺序须在 game.js 之后。
+// 设计约束：
+//  - AudioContext 只在“音效开启 + 首次用户交互”时才创建，遵守自动播放策略；
+//  - 每个音效时长 < 1.2s；
+//  - 设置写入 v2 存档的 settings.sound；
+//  - 任何 WebAudio 异常都不允许抛到游戏主流程（外层统一吞掉）。
+// ============================================================
+(function () {
+  "use strict";
+
+  var LS_KEY = "xiuxian-python-game-v2";
+  var ctx = null;
+  var master = null;
+  var noiseBuf = null;
+  var enabled = true;
+  var supported = !!(window.AudioContext || window.webkitAudioContext);
+
+  // ---------- 设置读写（v2 存档 settings.sound） ----------
+  function readSave() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function readSetting() {
+    var p = readSave();
+    if (p && p.settings && typeof p.settings === "object") {
+      enabled = p.settings.sound !== false;
+    } else {
+      enabled = true;
+    }
+  }
+
+  function persistSetting() {
+    try {
+      var p = readSave() || {};
+      if (!p.settings || typeof p.settings !== "object") p.settings = {};
+      p.settings.sound = enabled;
+      localStorage.setItem(LS_KEY, JSON.stringify(p));
+    } catch (e) {
+      // localStorage 不可用时静默跳过
+    }
+  }
+
+  // ---------- AudioContext（懒创建 + 自动播放策略） ----------
+  function ensureCtx() {
+    if (!enabled || !supported) return null;
+    if (!ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      try {
+        ctx = new AC();
+        master = ctx.createGain();
+        master.gain.value = 1;
+        master.connect(ctx.destination);
+      } catch (e) {
+        ctx = null;
+        master = null;
+        return null;
+      }
+    }
+    if (ctx.state === "suspended") {
+      try {
+        ctx.resume();
+      } catch (e) {
+        // 个别浏览器拒绝恢复时静默
+      }
+    }
+    return ctx;
+  }
+
+  // ---------- 合成工具 ----------
+  function envelope(ac, t0, peak, attack, decay) {
+    var g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(peak, t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + decay);
+    return g;
+  }
+
+  // 磬/钟式泛音：基频 + 少量非整数泛音，明亮而悠长
+  function bell(ac, freq, t0, amp, dur) {
+    var partials = [[1, 1], [2.74, 0.4], [5.38, 0.12]];
+    partials.forEach(function (p) {
+      var o = ac.createOscillator();
+      o.type = "sine";
+      o.frequency.value = freq * p[0];
+      var g = ac.createGain();
+      var peak = amp * p[1];
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.linearRampToValueAtTime(peak, t0 + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g);
+      g.connect(master);
+      o.start(t0);
+      o.stop(t0 + dur + 0.03);
+    });
+  }
+
+  function noiseBuffer(ac) {
+    if (noiseBuf) return noiseBuf;
+    var len = Math.floor(ac.sampleRate * 1.4);
+    var buf = ac.createBuffer(1, len, ac.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    noiseBuf = buf;
+    return noiseBuf;
+  }
+
+  // ---------- 各音效（全部 < 1.2s） ----------
+
+  // 点击/翻页：短促木鱼/拨弦（高频三角波快速下滑 + 低通，木质“笃”感）
+  function playClick(ac) {
+    var t0 = ac.currentTime;
+    var lp = ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 1500;
+    var g = envelope(ac, t0, 0.16, 0.003, 0.14);
+    var o = ac.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(780, t0);
+    o.frequency.exponentialRampToValueAtTime(460, t0 + 0.07);
+    o.connect(lp);
+    lp.connect(g);
+    g.connect(master);
+    o.start(t0);
+    o.stop(t0 + 0.17);
+  }
+
+  // 答对：清亮磬音，上行两音（C6 → E6）
+  function playRight(ac) {
+    var t0 = ac.currentTime;
+    bell(ac, 1046.5, t0, 0.1, 0.72);
+    bell(ac, 1318.5, t0 + 0.12, 0.11, 0.72);
+  }
+
+  // 答错：低闷鼓 + 下坠余音
+  function playWrong(ac) {
+    var t0 = ac.currentTime;
+    var g = envelope(ac, t0, 0.42, 0.003, 0.2);
+    var o = ac.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(150, t0);
+    o.frequency.exponentialRampToValueAtTime(65, t0 + 0.1);
+    o.connect(g);
+    g.connect(master);
+    o.start(t0);
+    o.stop(t0 + 0.24);
+
+    var t1 = t0 + 0.04;
+    var lp2 = ac.createBiquadFilter();
+    lp2.type = "lowpass";
+    lp2.frequency.value = 620;
+    var g2 = envelope(ac, t1, 0.08, 0.012, 0.52);
+    var o2 = ac.createOscillator();
+    o2.type = "triangle";
+    o2.frequency.setValueAtTime(330, t1);
+    o2.frequency.exponentialRampToValueAtTime(120, t1 + 0.48);
+    o2.connect(lp2);
+    lp2.connect(g2);
+    g2.connect(master);
+    o2.start(t1);
+    o2.stop(t1 + 0.56);
+  }
+
+  // 破境：由低到高的钟磬齐鸣（G4 C5 E5 G5 C6 依次上行）
+  function playBreakthrough(ac) {
+    var t0 = ac.currentTime;
+    var notes = [392, 523.25, 659.25, 783.99, 1046.5];
+    notes.forEach(function (f, i) {
+      bell(ac, f, t0 + i * 0.07, 0.085, 0.8);
+    });
+  }
+
+  // 渡劫雷声：低频噪声包络（滤波白噪声 + 指数衰减）
+  function playThunder(ac) {
+    var t0 = ac.currentTime;
+    var src = ac.createBufferSource();
+    src.buffer = noiseBuffer(ac);
+    src.loop = true;
+    var lp = ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(420, t0);
+    lp.frequency.exponentialRampToValueAtTime(90, t0 + 0.9);
+    lp.Q.value = 0.6;
+    var g = envelope(ac, t0, 0.55, 0.015, 1.02);
+    src.connect(lp);
+    lp.connect(g);
+    g.connect(master);
+    src.start(t0);
+    src.stop(t0 + 1.1);
+  }
+
+  // 印章解锁：短促“嗒”（高频点击，双振荡器，极短）
+  function playSeal(ac) {
+    var t0 = ac.currentTime;
+    var g1 = envelope(ac, t0, 0.18, 0.001, 0.07);
+    var o1 = ac.createOscillator();
+    o1.type = "sine";
+    o1.frequency.setValueAtTime(1450, t0);
+    o1.frequency.exponentialRampToValueAtTime(1050, t0 + 0.05);
+    o1.connect(g1);
+    g1.connect(master);
+    o1.start(t0);
+    o1.stop(t0 + 0.09);
+
+    var g2 = envelope(ac, t0 + 0.002, 0.055, 0.001, 0.05);
+    var o2 = ac.createOscillator();
+    o2.type = "sine";
+    o2.frequency.value = 2450;
+    o2.connect(g2);
+    g2.connect(master);
+    o2.start(t0 + 0.002);
+    o2.stop(t0 + 0.07);
+  }
+
+  var SOUNDS = {
+    click: playClick,
+    right: playRight,
+    wrong: playWrong,
+    breakthrough: playBreakthrough,
+    thunder: playThunder,
+    seal: playSeal
+  };
+
+  function play(name) {
+    if (!enabled) return;
+    var ac = ensureCtx();
+    if (!ac) return;
+    try {
+      var fn = SOUNDS[name] || playClick;
+      fn(ac);
+    } catch (e) {
+      // 单次合成失败不影响后续
+    }
+  }
+
+  // ---------- 喇叭按钮 UI ----------
+  function syncUI() {
+    var btn = document.getElementById("btnSound");
+    if (!btn) return;
+    btn.classList.toggle("is-off", !enabled);
+    btn.setAttribute("aria-pressed", enabled ? "true" : "false");
+    btn.title = enabled ? "音效：开（点击关闭）" : "音效：关（点击开启）";
+    var label = btn.querySelector(".snd-label");
+    if (label) label.textContent = enabled ? "音效" : "音效（关）";
+  }
+
+  // 通用点击音：非“作答/校验”按钮的点击都发短促木鱼声。
+  // 作答类按钮（.opt、校验、渡劫提交）由 game.js 在成功/失败回调里播专属音效，
+  // 这里不再叠加。
+  function onDocClick(ev) {
+    if (!enabled) return;
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    var ctrl = t.closest("button, .road-node");
+    if (!ctrl || ctrl.disabled) return;
+    if (ctrl.id === "btnSound") return;
+    if (ctrl.classList.contains("road-node")) {
+      if (!ctrl.classList.contains("done") && !ctrl.classList.contains("current")) return;
+    }
+    if (ctrl.classList.contains("opt")) return;
+    var inline = (ctrl.getAttribute && ctrl.getAttribute("onclick")) || "";
+    if (inline.indexOf("checkFill") !== -1 || inline.indexOf("submitBoss") !== -1) return;
+    play("click");
+  }
+
+  // ---------- 对外接口（纯新增，不影响 App.* 既有 API） ----------
+  window.App = window.App || {};
+
+  window.App.setSound = function (on) {
+    enabled = !!on;
+    persistSetting();
+    syncUI();
+    if (master && ctx) {
+      try {
+        master.gain.cancelScheduledValues(ctx.currentTime);
+        if (!enabled) {
+          // 正在播放的余音快速收掉
+          master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), ctx.currentTime);
+          master.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
+        } else {
+          master.gain.setValueAtTime(0.0001, ctx.currentTime);
+          master.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.05);
+        }
+      } catch (e) {
+        // 忽略
+      }
+    }
+  };
+
+  window.App.sfx = play;
+  window.App.isSoundOn = function () {
+    return enabled;
+  };
+
+  // ---------- 启动 ----------
+  readSetting();
+  var btn = document.getElementById("btnSound");
+  if (btn) {
+    btn.addEventListener("click", function () {
+      window.App.setSound(!enabled);
+    });
+  }
+  document.addEventListener("click", onDocClick);
+  syncUI();
+})();
