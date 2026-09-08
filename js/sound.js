@@ -55,7 +55,8 @@
       try {
         ctx = new AC();
         master = ctx.createGain();
-        master.gain.value = 1;
+        // 总响度先压低，避免合成音贴脸、显得像廉价提示音。
+        master.gain.value = 0.62;
         master.connect(ctx.destination);
       } catch (e) {
         ctx = null;
@@ -116,17 +117,17 @@
 
   // ---------- 各音效（全部 < 1.2s） ----------
 
-  // 点击/翻页：短促木鱼/拨弦（高频三角波快速下滑 + 低通，木质“笃”感）
+  // 点击/翻页：极轻的木质触感，不再用明显的电子“哔”提示。
   function playClick(ac) {
     var t0 = ac.currentTime;
     var lp = ac.createBiquadFilter();
     lp.type = "lowpass";
-    lp.frequency.value = 1500;
-    var g = envelope(ac, t0, 0.16, 0.003, 0.14);
+    lp.frequency.value = 980;
+    var g = envelope(ac, t0, 0.055, 0.006, 0.11);
     var o = ac.createOscillator();
     o.type = "triangle";
-    o.frequency.setValueAtTime(780, t0);
-    o.frequency.exponentialRampToValueAtTime(460, t0 + 0.07);
+    o.frequency.setValueAtTime(430, t0);
+    o.frequency.exponentialRampToValueAtTime(285, t0 + 0.07);
     o.connect(lp);
     lp.connect(g);
     g.connect(master);
@@ -134,17 +135,17 @@
     o.stop(t0 + 0.17);
   }
 
-  // 答对：清亮磬音，上行两音（C6 → E6）
+  // 答对：低音量玉磬双音，保留确认感，不做夸张奖励音。
   function playRight(ac) {
     var t0 = ac.currentTime;
-    bell(ac, 1046.5, t0, 0.1, 0.72);
-    bell(ac, 1318.5, t0 + 0.12, 0.11, 0.72);
+    bell(ac, 783.99, t0, 0.06, 0.52);
+    bell(ac, 987.77, t0 + 0.11, 0.052, 0.50);
   }
 
   // 答错：低闷鼓 + 下坠余音
   function playWrong(ac) {
     var t0 = ac.currentTime;
-    var g = envelope(ac, t0, 0.42, 0.003, 0.2);
+    var g = envelope(ac, t0, 0.15, 0.004, 0.18);
     var o = ac.createOscillator();
     o.type = "sine";
     o.frequency.setValueAtTime(150, t0);
@@ -158,7 +159,7 @@
     var lp2 = ac.createBiquadFilter();
     lp2.type = "lowpass";
     lp2.frequency.value = 620;
-    var g2 = envelope(ac, t1, 0.08, 0.012, 0.52);
+    var g2 = envelope(ac, t1, 0.028, 0.012, 0.38);
     var o2 = ac.createOscillator();
     o2.type = "triangle";
     o2.frequency.setValueAtTime(330, t1);
@@ -198,27 +199,18 @@
     src.stop(t0 + 1.1);
   }
 
-  // 印章解锁：短促“嗒”（高频点击，双振荡器，极短）
+  // 印章解锁：压印的低木声，替代刺耳高频点击。
   function playSeal(ac) {
     var t0 = ac.currentTime;
-    var g1 = envelope(ac, t0, 0.18, 0.001, 0.07);
+    var g1 = envelope(ac, t0, 0.08, 0.003, 0.12);
     var o1 = ac.createOscillator();
     o1.type = "sine";
-    o1.frequency.setValueAtTime(1450, t0);
-    o1.frequency.exponentialRampToValueAtTime(1050, t0 + 0.05);
+    o1.frequency.setValueAtTime(330, t0);
+    o1.frequency.exponentialRampToValueAtTime(180, t0 + 0.08);
     o1.connect(g1);
     g1.connect(master);
     o1.start(t0);
-    o1.stop(t0 + 0.09);
-
-    var g2 = envelope(ac, t0 + 0.002, 0.055, 0.001, 0.05);
-    var o2 = ac.createOscillator();
-    o2.type = "sine";
-    o2.frequency.value = 2450;
-    o2.connect(g2);
-    g2.connect(master);
-    o2.start(t0 + 0.002);
-    o2.stop(t0 + 0.07);
+    o1.stop(t0 + 0.15);
   }
 
   // 灵宠升阶：短促上行琶音（C5 E5 G5 C6），明亮雀跃
@@ -226,16 +218,16 @@
     var t0 = ac.currentTime;
     var notes = [523.25, 659.25, 783.99, 1046.5];
     notes.forEach(function (f, i) {
-      var g = envelope(ac, t0 + i * 0.055, 0.12, 0.004, 0.34);
+      var g = envelope(ac, t0 + i * 0.075, 0.045, 0.006, 0.30);
       var o = ac.createOscillator();
-      o.type = "triangle";
+      o.type = "sine";
       o.frequency.value = f;
       o.connect(g);
       g.connect(master);
       o.start(t0 + i * 0.055);
-      o.stop(t0 + i * 0.055 + 0.4);
+      o.stop(t0 + i * 0.075 + 0.34);
       // 加一道极轻的磬音泛音，灵性更足
-      bell(ac, f * 2, t0 + i * 0.055, 0.03, 0.32);
+      bell(ac, f, t0 + i * 0.075, 0.022, 0.30);
     });
   }
 
@@ -262,7 +254,7 @@
   }
 
   // ---------- 场景环境音（i2-1：极轻滤噪底噪，宁缺毋滥只留两档） ----------
-  // scene5 夜枭谷：夜风；scene6 渡劫：风雨。其余场景保持静默，
+  // scene5 夜枭谷保留极轻夜风；问心静台保持静默，避免用环境噪声代替氛围。
   // 避免廉价底噪反而破坏氛围。音量一律 -28dB 上下，可随主音效开关静默。
   var ambient = null; // { scene, layers:[{gain,stops}], timer }
   var ambScene = -1;
@@ -280,33 +272,10 @@
           type: "lowpass",
           freq: 330,
           q: 0.7,
-          gain: 0.045,
+          gain: 0.022,
           lfoHz: 0.08,
           lfoDepth: 150,
           lfoGain: 0.013
-        }
-      ];
-    }
-    if (scene === 6) {
-      // 风雨：低闷风声 + 一点中高频雨噪（雨丝视觉仍由 CSS 负责）
-      return [
-        {
-          type: "lowpass",
-          freq: 190,
-          q: 0.55,
-          gain: 0.038,
-          lfoHz: 0.11,
-          lfoDepth: 110,
-          lfoGain: 0.011
-        },
-        {
-          type: "bandpass",
-          freq: 1750,
-          q: 0.85,
-          gain: 0.014,
-          lfoHz: 0.27,
-          lfoDepth: 260,
-          lfoGain: 0.004
         }
       ];
     }
@@ -440,7 +409,7 @@
     if (label) label.textContent = enabled ? "音效" : "音效（关）";
   }
 
-  // 通用点击音：非“作答/校验”按钮的点击都发短促木鱼声。
+  // 只为关键推进动作留触感，避免每个按钮都堆叠出廉价提示音。
   // 作答类按钮（.opt、校验、渡劫提交）由 game.js 在成功/失败回调里播专属音效，
   // 这里不再叠加。
   function onDocClick(ev) {
@@ -450,6 +419,7 @@
     var ctrl = t.closest("button, .road-node");
     if (!ctrl || ctrl.disabled) return;
     if (ctrl.id === "btnSound") return;
+    if (!ctrl.classList.contains("primary") && !ctrl.classList.contains("road-node") && ctrl.id !== "immersionToggle") return;
     if (ctrl.classList.contains("road-node")) {
       if (!ctrl.classList.contains("done") && !ctrl.classList.contains("current")) return;
     }

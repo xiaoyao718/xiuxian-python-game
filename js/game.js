@@ -1,6 +1,6 @@
 // ============================================================
 // 游戏引擎 · 第一卷
-// 剧情 → 讲解 → 试炼（3 题）→ 破境 → 下一章；终章为写代码渡劫。
+// 剧情 → 讲解 → 试炼（3 题）→ 破境 → 下一章；终章为写代码问心。
 // ============================================================
 
 (function () {
@@ -29,20 +29,40 @@
   let scenePending = null;
   let bossTriesPainted = -1;
   let breakEndHandler = null;
+  let parallaxFrame = 0;
+  let parallaxX = 0;
+  let parallaxY = 0;
+  let parallaxTargetX = 0;
+  let parallaxTargetY = 0;
 
   // 指针视差：插图随光标轻移，只启用鼠标设备
   if (!reducedMotion && window.matchMedia("(pointer: fine)").matches) {
     const appBox = document.getElementById("app");
+    // 低速镜头缓动：不再让背景逐帧紧跟鼠标，降低眩晕风险。
+    const easeParallax = function () {
+      parallaxX += (parallaxTargetX - parallaxX) * 0.055;
+      parallaxY += (parallaxTargetY - parallaxY) * 0.055;
+      appBox.style.setProperty("--px", parallaxX.toFixed(3));
+      appBox.style.setProperty("--py", parallaxY.toFixed(3));
+      if (Math.abs(parallaxTargetX - parallaxX) > 0.002 || Math.abs(parallaxTargetY - parallaxY) > 0.002) {
+        parallaxFrame = window.requestAnimationFrame(easeParallax);
+      } else {
+        parallaxFrame = 0;
+      }
+    };
+    const setParallaxTarget = function (x, y) {
+      parallaxTargetX = x;
+      parallaxTargetY = y;
+      if (!parallaxFrame) parallaxFrame = window.requestAnimationFrame(easeParallax);
+    };
     stageBox.addEventListener("pointermove", function (ev) {
       const r = stageBox.getBoundingClientRect();
       const px = ((ev.clientX - r.left) / Math.max(r.width, 1) - 0.5) * 2;
       const py = ((ev.clientY - r.top) / Math.max(r.height, 1) - 0.5) * 2;
-      appBox.style.setProperty("--px", px.toFixed(3));
-      appBox.style.setProperty("--py", py.toFixed(3));
+      setParallaxTarget(px, py);
     });
     stageBox.addEventListener("pointerleave", function () {
-      appBox.style.setProperty("--px", "0");
-      appBox.style.setProperty("--py", "0");
+      setParallaxTarget(0, 0);
     });
   }
 
@@ -57,7 +77,11 @@
       // i2-3：灵宠（stage/growth/cleared 三组题组完成标记）、灵器、灵石
       pets: {},
       artifacts: [],
-      spiritStones: 0
+      spiritStones: 0,
+      // 剧情阅读记录：按关卡、段落与节点存储，只用于已读剧情的快速略过
+      narrativeSeen: {},
+      // i3 P1c：反派对决后的关系标记（如 e_night_patrol:'defeated'）
+      rivals: {}
     };
   }
 
@@ -109,6 +133,22 @@
       });
     }
     s.spiritStones = Math.max(0, Math.floor(Number(p.spiritStones) || 0));
+    if (p.narrativeSeen && typeof p.narrativeSeen === "object") {
+      Object.keys(p.narrativeSeen).forEach(function (key) {
+        if (/^lv\d+:(story|quest|outro):\d+$/.test(key) && p.narrativeSeen[key] === true) {
+          s.narrativeSeen[key] = true;
+        }
+      });
+    }
+    // 关系标记：白名单字符串值，脏档补默认
+    s.rivals = {};
+    if (p.rivals && typeof p.rivals === "object") {
+      Object.keys(p.rivals).forEach(function (k) {
+        if (typeof k === "string" && typeof p.rivals[k] === "string") {
+          s.rivals[k] = p.rivals[k];
+        }
+      });
+    }
     return s;
   }
 
@@ -200,6 +240,28 @@
     } catch (e) {
       // 存储失败不阻断游玩
     }
+  }
+
+  function narrativeKey(section, pos) {
+    const lv = D.levels[cur.li];
+    return (lv ? lv.id : "lv0") + ":" + section + ":" + pos;
+  }
+
+  function markNarrativeSeen(section, pos) {
+    const key = narrativeKey(section, pos);
+    if (state.narrativeSeen[key]) return;
+    state.narrativeSeen[key] = true;
+    saveState();
+  }
+
+  function allNarrativeSeen(section, items) {
+    const list = Array.isArray(items) ? items : [];
+    const nodes = list
+      .map(function (item, pos) { return { item: item, pos: pos }; })
+      .filter(function (node) { return section !== "quest" || node.item.q === undefined; });
+    return nodes.length > 0 && nodes.every(function (node) {
+      return state.narrativeSeen[narrativeKey(section, node.pos)] === true;
+    });
   }
 
   function esc(s) {
@@ -372,6 +434,22 @@
         }
       }
     }
+    // i3 P1c：反派对决“找茬题”记入错题本后，允许从灵宠题库解析重做
+    if (Array.isArray(D.pets) && D.petQuests) {
+      for (let pi = 0; pi < D.pets.length; pi++) {
+        const pid = D.pets[pi].id;
+        const groups = D.petQuests[pid];
+        if (!groups) continue;
+        for (let g = 0; g < groups.length; g++) {
+          const arr = groups[g] || [];
+          for (let q2 = 0; q2 < arr.length; q2++) {
+            if (match(arr[q2])) {
+              return { li: li, pool: "pet:" + pid, qi: q2, q: arr[q2] };
+            }
+          }
+        }
+      }
+    }
     return null;
   }
 
@@ -482,6 +560,7 @@
 
   // 渲染收尾：若本屏是新“幕”（章节/题目/结算切换），给卡片加幕布式入场
   function finishStage(override) {
+    syncImmersiveMode();
     stopTypewriter();
     if (cur.wipeNext) {
       cur.wipeNext = false;
@@ -684,7 +763,7 @@
     let right = "";
     if (opts.skip) {
       right +=
-        '<button class="btn ghost small" data-skip="1" onclick="App.skip()" type="button">跳过剧情</button> ';
+        '<button class="btn ghost small" data-skip="1" onclick="App.skip()" type="button">略过已读剧情</button> ';
     }
     right +=
       '<button class="btn primary" onclick="App.next()" type="button">' +
@@ -721,17 +800,20 @@
     stopTypewriter();
     cur.coverShown = true;
     cur.finaleShown = false;
+    syncImmersiveMode();
     renderRoadmap();
     applyScene(0);
     stageBox.innerHTML =
       '<div class="card cover-card wipe-card">' +
       '<div class="scroll-rod scroll-rod-top" aria-hidden="true"></div>' +
       '<div class="scroll-rod scroll-rod-bottom" aria-hidden="true"></div>' +
+      '<div class="cover-mark" aria-hidden="true"><span>启</span><i></i><small>卷一</small></div>' +
       '<div class="cover-eyebrow">' + esc(D.meta.world) + " · Python 仙典</div>" +
       '<div class="cover-title">' + esc(D.meta.title) + "</div>" +
       '<div class="cover-quote">「早岁已知世事艰，仍许飞鸿荡云间。」</div>' +
       '<div class="cover-sub">' + esc(D.meta.volume) + "</div>" +
       '<div class="cover-desc">' + esc(D.meta.volumeDesc) + "</div>" +
+      '<div class="cover-ledger"><span>抄纹阁 · 子夜</span><span>第一卷 · 六章</span><span>从凡人至筑基</span></div>' +
       '<div class="center"><button class="btn primary cover-start" onclick="App.start()" type="button">开始修行</button></div>' +
       "</div>";
   }
@@ -776,22 +858,25 @@
     let body = (cur.si === 0 ? topMeta(cur.li) : miniHead(cur.li)) + '<div class="dialog-list">';
 
     if (cur.si < lines.length) {
+      const canSkip = allNarrativeSeen("story", lines);
       body += dialogHTML(lines, cur.si, false);
       body += "</div>";
       body += navHTML({
-        skip: true,
+        skip: canSkip,
         nextLabel: cur.si === lines.length - 1 ? "继续 ▸" : "继续 ▸"
       });
     } else {
-      const label = lv.kind === "boss" ? "开始渡劫" : "开始听讲";
+      const label = lv.kind === "boss" ? "开始问心" : "开始听讲";
       body +=
         '<div class="dialog-end">夜色未尽，天光将亮——你已想清楚下一步。</div></div>';
       body += '<div class="btn-row"><button class="btn primary" onclick="App.enterLevel()" type="button">' + label + "</button></div>";
     }
 
     stageBox.innerHTML = '<div class="card">' + body + "</div>";
+    syncImmersiveMode();
     finishStage();
     startTypewriter(stageBox);
+    if (cur.si < lines.length) markNarrativeSeen("story", cur.si);
   }
 
   function storyNext() {
@@ -952,6 +1037,7 @@
     }
 
     const hasMore = cur.questPos + 1 < items.length;
+    const canSkip = allNarrativeSeen("quest", items);
     const lastLabel = !hasMore && quizIntroEnabled(lv) ? "继续 ▸" : "突破境界";
     stageBox.innerHTML =
       '<div class="card">' +
@@ -960,14 +1046,16 @@
       dialogHTML(items, cur.questPos, false) +
       "</div>" +
       '<div class="btn-row">' +
-      '<button class="btn ghost small" data-skip="1" onclick="App.questSkip()" type="button">跳过剧情</button>' +
+      (canSkip ? '<button class="btn ghost small" data-skip="1" onclick="App.questSkip()" type="button">略过已读剧情</button>' : "") +
       '<button class="btn primary" onclick="App.questContinue()" type="button">' +
       (hasMore ? "继续 ▸" : lastLabel) +
       "</button>" +
       "</div>" +
       "</div>";
+    syncImmersiveMode();
     finishStage();
     startTypewriter(stageBox);
+    markNarrativeSeen("quest", cur.questPos);
   }
 
   // ---------- 题目通用渲染（历练 / 试炼 / 错题重做共用） ----------
@@ -1418,11 +1506,44 @@
     cur.qDone = false;
     cur.qi += 1;
     if (cur.qi >= qs.length) {
-      finishLevel();
+      // i3 P1c：静室试炼通关后，教学章先进入反派对决，胜利后再走破境
+      const btl = (D.battles || []).find(function (b) {
+        return b.levelId === D.levels[cur.li].id;
+      });
+      if (btl && D.levels[cur.li].kind !== "boss") {
+        callApp("openBattle", btl);
+      } else {
+        finishLevel();
+      }
       return;
     }
     cur.wipeNext = true;
     paintQuiz();
+  }
+
+  // i3 P1c：把反派对决中“找茬题”的答错记入错题本（支持灵宠题库来源）
+  function recordBattleMistake(levelId, q, userAnswer) {
+    if (!q) return;
+    const qType = qTypeOf(q);
+    const oldIdx = state.mistakes.findIndex(function (m) {
+      return mistakeMatches(m, levelId, qType, q.q);
+    });
+    const rec = {
+      levelId: levelId,
+      qi: -1,
+      qType: qType,
+      qText: q.q,
+      userAnswer: userAnswer || "",
+      correctAnswer: correctAnswerOf(q),
+      ts: Date.now()
+    };
+    if (oldIdx !== -1) {
+      state.mistakes[oldIdx] = rec;
+    } else {
+      state.mistakes.push(rec);
+    }
+    saveState();
+    refreshMistakeBadge();
   }
 
   function backLesson() {
@@ -1636,9 +1757,9 @@
     const from = cur.li === 0 ? D.realms[0] : D.levels[cur.li - 1].stageLabel;
     const to = lv.stageLabel;
     const isBoss = lv.kind === "boss";
-    const eyebrow = isBoss ? "九重天雷 · 筑基在望" : "灵气盈体 · 破境在即";
-    const say = isBoss ? "天劫已渡，大道初开" : "灵气入体，境界再进一步";
-    const sealChar = isBoss ? "渡" : "破";
+    const eyebrow = isBoss ? "灵台问心 · 重铸已成" : "灵气盈体 · 破境在即";
+    const say = isBoss ? "碎纹尽敛，灵台归一" : "灵气入体，境界再进一步";
+    const sealChar = isBoss ? "筑" : "破";
 
     let dust = "";
     for (let i = 0; i < 16; i++) {
@@ -1668,38 +1789,42 @@
     }
 
     fxBox.classList.remove("fx-hidden");
-    fxBox.innerHTML =
-      '<div class="break-veil">' +
-      '<div class="break-halo"></div>' +
-      '<div class="break-rune"></div>' +
-      '<div class="break-ring"></div>' +
-      '<div class="break-pillar"></div>' +
-      '<span class="break-dust">' + dust + "</span>" +
-      '<span class="break-qi">' + qi + "</span>" +
-      '<div class="break-shock s1"></div>' +
-      '<div class="break-shock s2"></div>' +
-      '<div class="break-inner">' +
-      '<div class="break-eyebrow">' + esc(eyebrow) + "</div>" +
-      '<div class="break-old">' + esc(from) + "</div>" +
-      '<div class="break-arrow">⟶</div>' +
-      '<div class="break-new">' + esc(to) + "</div>" +
-      '<div class="break-say">' + esc(say) + "</div>" +
-      '<div class="break-seal">' + sealChar + "</div>" +
-      "</div>" +
-      '<div class="break-skip">轻触画面 · 跳过法相</div>' +
-      "</div>";
-
-    // Boss 渡劫演出：雷云下压后三次雷闪逐次增强（复用 flashHit，i2-2）
-    if (isBoss && !reducedMotion) {
-      window.setTimeout(function () {
-        pageLightning();
-      }, 260);
-      window.setTimeout(function () {
-        pageLightning();
-      }, 780);
-      window.setTimeout(function () {
-        pageLightning();
-      }, 1280);
+    if (isBoss) {
+      fxBox.innerHTML =
+        '<div class="break-veil reforge-veil">' +
+        '<div class="reforge-wash"></div>' +
+        '<div class="reforge-stone"></div>' +
+        '<div class="break-inner">' +
+        '<div class="break-eyebrow">' + esc(eyebrow) + "</div>" +
+        '<div class="break-old">' + esc(from) + "</div>" +
+        '<div class="break-arrow">⟶</div>' +
+        '<div class="break-new">' + esc(to) + "</div>" +
+        '<div class="break-say">' + esc(say) + "</div>" +
+        '<div class="break-seal">' + sealChar + "</div>" +
+        "</div>" +
+        '<div class="break-skip">轻触画面 · 收束心神</div>' +
+        "</div>";
+    } else {
+      fxBox.innerHTML =
+        '<div class="break-veil">' +
+        '<div class="break-halo"></div>' +
+        '<div class="break-rune"></div>' +
+        '<div class="break-ring"></div>' +
+        '<div class="break-pillar"></div>' +
+        '<span class="break-dust">' + dust + "</span>" +
+        '<span class="break-qi">' + qi + "</span>" +
+        '<div class="break-shock s1"></div>' +
+        '<div class="break-shock s2"></div>' +
+        '<div class="break-inner">' +
+        '<div class="break-eyebrow">' + esc(eyebrow) + "</div>" +
+        '<div class="break-old">' + esc(from) + "</div>" +
+        '<div class="break-arrow">⟶</div>' +
+        '<div class="break-new">' + esc(to) + "</div>" +
+        '<div class="break-say">' + esc(say) + "</div>" +
+        '<div class="break-seal">' + sealChar + "</div>" +
+        "</div>" +
+        '<div class="break-skip">轻触画面 · 跳过法相</div>' +
+        "</div>";
     }
 
     let ended = false;
@@ -1722,7 +1847,7 @@
         endBreakFx();
       }
     }
-    var timer = window.setTimeout(endBreakFx, reducedMotion ? 160 : 2300);
+    var timer = window.setTimeout(endBreakFx, reducedMotion ? 160 : isBoss ? 1700 : 2300);
     if (breakEndHandler) fxBox.removeEventListener("click", breakEndHandler);
     fxBox.addEventListener("click", (breakEndHandler = endBreakFx));
     document.addEventListener("keydown", onKeySkip);
@@ -1746,14 +1871,21 @@
     const isBoss = lv.kind === "boss";
     const primary = isBoss ? "翻开下一卷" : "开启下一章剧情";
     const desc = isBoss
-      ? "九重天雷已散，云海尽头透出新的天光——下一卷的大门，等你亲手推开。"
+      ? "没有雷声，也没有旁观者。碎了三年的灵台在晨雾里重新归位——下一卷的大门，等你亲手推开。"
       : "境界已成。山门外风声渐起，下一段故事，正等着你落笔。";
+    const clearClass = isBoss ? " reforge-clear" : "";
+    const seal = isBoss ? "筑" : "破";
+    const eyebrow = isBoss ? "问心已过 · 灵台归一" : "境界已成";
+    const gains = isBoss
+      ? '<div class="reforge-gains"><span>所得 · 筑基心诀</span><span>留痕 · 问心碑拓</span></div>'
+      : "";
     stageBox.innerHTML =
-      '<div class="card finale-card clear-card">' +
-      '<div class="finale-seal">' + (isBoss ? "渡" : "破") + "</div>" +
-      '<div class="clear-eyebrow">境界已成</div>' +
+      '<div class="card finale-card clear-card' + clearClass + '">' +
+      '<div class="finale-seal">' + seal + "</div>" +
+      '<div class="clear-eyebrow">' + eyebrow + "</div>" +
       '<h2 class="finale-title clear-realm">' + esc(lv.stageLabel) + "</h2>" +
       '<p class="finale-desc">' + desc + "</p>" +
+      gains +
       '<div class="btn-row center-row">' +
       '<button class="btn ghost" onclick="App.readOutro()" type="button">查看本章尾声</button>' +
       '<button class="btn primary" onclick="App.afterOutro()" type="button">' + primary + "</button>" +
@@ -1776,9 +1908,10 @@
     let body = miniHead(cur.li) + '<div class="dialog-list">';
 
     if (cur.si < lines.length) {
+      const canSkip = allNarrativeSeen("outro", lines);
       body += dialogHTML(lines, cur.si, true);
       body += "</div>";
-      body += navHTML({ skip: false, nextLabel: cur.si === lines.length - 1 ? "继续 ▸" : "继续 ▸" });
+      body += navHTML({ skip: canSkip, nextLabel: cur.si === lines.length - 1 ? "继续 ▸" : "继续 ▸" });
     } else {
       body += "</div>";
       const isBoss = lv.kind === "boss";
@@ -1789,8 +1922,10 @@
         "</div>";
     }
     stageBox.innerHTML = '<div class="card">' + body + "</div>";
+    syncImmersiveMode();
     finishStage();
     startTypewriter(stageBox);
+    if (cur.si < lines.length) markNarrativeSeen("outro", cur.si);
   }
 
   function outroNext() {
@@ -1814,8 +1949,8 @@
     }
   }
 
-  // ---------- 渡劫（A 类：写代码） ----------
-  // 整页雷闪 + data-tries 挂点（只挂视觉，不碰 submitBoss 判定）
+  // ---------- 问心（A 类：写代码） ----------
+  // 保留答错次数，只提供安静的进度提示，不再把学习失误视觉化为灾难。
   let lightningTimer = null;
   function pageLightning() {
     const hit = document.getElementById("flashHit");
@@ -1834,7 +1969,6 @@
     document.documentElement.setAttribute("data-tries", String(tries));
     if (cur.tries > 0 && cur.tries > bossTriesPainted) {
       bossTriesPainted = cur.tries;
-      pageLightning();
     }
     if (cur.tries === 0) bossTriesPainted = 0;
   }
@@ -1853,7 +1987,7 @@
     if (cur.tries > 0) {
       hintHtml +=
         '<div class="fb fb-bad boss-fail">' +
-        '<div class="fb-title">天雷纹丝不动（已试 ' + cur.tries + " 次）</div>" +
+        '<div class="fb-title">心诀尚未合拢（已试 ' + cur.tries + " 次）</div>" +
         '<div class="fb-body">' + esc(t.hint) + "</div>" +
         "</div>";
       hintHtml += bossDiffHTML();
@@ -1869,22 +2003,22 @@
     stageBox.innerHTML =
       '<div class="card">' +
       miniHead(cur.li) +
-      '<h3 class="lesson-name">渡劫任务 · 修正抗雷法诀</h3>' +
+      '<h3 class="lesson-name">问心任务 · 校正残缺心诀</h3>' +
       '<p class="lesson-intro">' + esc(t.lead) + "</p>" +
       '<ol class="boss-steps">' + steps + "</ol>" +
       '<div class="code-wrap">' +
-      '<div class="code-head"><span>石碑上的残缺法诀</span>' +
+      '<div class="code-head"><span>问心碑上的残缺心诀</span>' +
       '<button class="btn ghost small" onclick="App.copyBossCode()" type="button">复制代码</button></div>' +
       '<pre class="code-block">' + esc(t.code) + "</pre>" +
       "</div>" +
       '<div class="boss-answer">' +
       '<label class="field-label" for="bossAns">把运行输出原样粘贴到这里</label>' +
-      '<textarea id="bossAns" rows="5" placeholder="第1道天雷，渡！&#10;第2道天雷，渡！&#10;第3道天雷，渡！"></textarea>' +
+      '<textarea id="bossAns" rows="5" placeholder="第1重心诀，定。&#10;第2重心诀，定。&#10;第3重心诀，定。"></textarea>' +
       "</div>" +
       hintHtml +
       '<div class="btn-row">' +
       '<button class="btn ghost small" onclick="App.backStory()" type="button">回看剧情</button>' +
-      '<button class="btn primary" onclick="App.submitBoss()" type="button">渡劫</button>' +
+      '<button class="btn primary" onclick="App.submitBoss()" type="button">校正心诀</button>' +
       "</div>" +
       "</div>";
 
@@ -1911,7 +2045,7 @@
     return t === "" ? [] : t.split("\n");
   }
 
-  // 渡劫差异反馈：你的输出 vs 预期输出，逐行对比
+  // 问心差异反馈：你的输出 vs 预期输出，逐行对比
   // 判定仍走 norm()（trim 语义不变）；3 次答错前不揭晓完整预期行内容
   function bossDiffHTML() {
     const t = D.levels[cur.li].task;
@@ -2013,7 +2147,7 @@
       finishLevel();
     } else {
       cur.tries += 1;
-      sfx("thunder");
+      sfx("wrong");
       paintBoss();
     }
   }
@@ -2024,15 +2158,18 @@
     cur.finaleShown = true;
     cur.coverShown = false;
     stageBox.innerHTML =
-      '<div class="card finale-card">' +
-      '<div class="finale-seal">完</div>' +
-      '<h2 class="finale-title">第一卷 · 完</h2>' +
-      '<p class="finale-sub">仓绝大陆 · 修仙学 Python 入门篇</p>' +
+      '<div class="card finale-card volume-final-card">' +
+      '<div class="volume-final-mark" aria-hidden="true"><span>收</span><i></i><small>卷一</small></div>' +
+      '<div class="finale-seal">筑</div>' +
+      '<div class="volume-final-eyebrow">仓绝大陆 · 静台晨雾</div>' +
+      '<h2 class="finale-title">第一卷 · 收卷</h2>' +
+      '<p class="finale-sub">修仙学 Python · 入门篇已毕</p>' +
       '<p class="finale-desc">' +
-      "你已陪林慕从人人嘲笑的抄纹少年，走到亲手写下渡劫法诀、筑基功成。<br>" +
+      "你已陪林慕从人人嘲笑的抄纹少年，走到亲手校正问心诀、灵台重铸。<br>" +
       "下一卷预告：筑基之后，是字符串与列表的秘境——小师妹的笔记本里，藏着下一个副本。<br>" +
-      "（等你学到列表与字符串时，我们再开新卷。）" +
+      "下一卷开启前，先把这一卷所学收进自己的行囊。" +
       "</p>" +
+      '<div class="volume-final-ledger"><span>已过 · 六章</span><span>所得 · 筑基心诀</span><span>待启 · 列表与字符串</span></div>' +
       '<div class="btn-row center-row">' +
       '<button class="btn ghost" onclick="App.cover()" type="button">回到封面</button>' +
       '<button class="btn primary" onclick="App.reset()" type="button">重置进度，重头再修</button>' +
@@ -2195,6 +2332,41 @@
     if (document.body.classList.contains("is-side-open")) setSideDrawer(false);
   }
 
+  // ---------- 沉浸模式：叙事时收起章节栏，保留一枚可随时唤回的书签 ----------
+  function isNarrativeScreen() {
+    if (cur.coverShown || cur.finaleShown) return false;
+    if (cur.phase === "story" || cur.phase === "outro") return true;
+    if (cur.phase !== "quest") return false;
+    const item = questItems()[cur.questPos];
+    return !!item && item.q === undefined;
+  }
+
+  function syncImmersiveMode() {
+    const active = isNarrativeScreen();
+    const toggle = document.getElementById("immersionToggle");
+    // 同一关内的讲解、题目、历练都共享当前地点背景；封面/结算仍保留各自舞台。
+    const chapterScreen = !cur.coverShown && !cur.finaleShown && cur.li >= 0 &&
+      ["story", "lesson", "quest", "quizintro", "quiz", "boss", "outro"].indexOf(cur.phase) !== -1;
+    document.body.classList.toggle("is-chapter-screen", chapterScreen);
+    if (!active) {
+      document.body.classList.remove("is-immersive", "is-immersive-nav-revealed");
+    } else {
+      document.body.classList.add("is-immersive");
+    }
+    const revealed = document.body.classList.contains("is-immersive-nav-revealed");
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", revealed ? "true" : "false");
+      toggle.setAttribute("aria-label", revealed ? "收起章节导航" : "展开章节导航");
+      toggle.title = revealed ? "收起章节导航" : "展开章节导航";
+    }
+  }
+
+  function toggleImmersiveNav() {
+    if (!document.body.classList.contains("is-immersive")) return;
+    document.body.classList.toggle("is-immersive-nav-revealed");
+    syncImmersiveMode();
+  }
+
   window.App = {
     start: function () {
       const i = firstUndone();
@@ -2303,7 +2475,19 @@
       saveState();
     },
     // 供行囊/操练 overlay 使用：关闭移动端抽屉
-    closeDrawer: closeSideDrawer
+    closeDrawer: closeSideDrawer,
+    toggleImmersiveNav: toggleImmersiveNav,
+    // i3 P1c：关系标记与战斗错题
+    markRival: function (enemyId) {
+      if (!enemyId) return;
+      state.rivals[enemyId] = "defeated";
+      saveState();
+    },
+    isRival: function (enemyId) {
+      return !!(state.rivals && state.rivals[enemyId]);
+    },
+    recordBattleMistake: recordBattleMistake,
+    openBattle: null // 由 js/battle.js 注册（游戏引擎只负责在试炼后回调）
   };
 
   // ---------- 启动 ----------
@@ -2317,6 +2501,8 @@
     });
   }
   if (sideMask) sideMask.addEventListener("click", closeSideDrawer);
+  const immersionToggle = document.getElementById("immersionToggle");
+  if (immersionToggle) immersionToggle.addEventListener("click", toggleImmersiveNav);
   if (btnMistakes) btnMistakes.addEventListener("click", openMistakes);
   document.addEventListener("keydown", onGlobalKey);
   document.addEventListener("keydown", function (ev) {
@@ -2333,5 +2519,13 @@
     showCover();
   } else {
     goStory(first);
+  }
+  // 调试预览：/?battle=1 直达第一场反派对决（正常游玩不触发）
+  if (/[?&]battle=1/.test(window.location.search || "")) {
+    window.setTimeout(function () {
+      if (window.App && typeof window.App.openBattle === "function" && D.battles && D.battles[0]) {
+        window.App.openBattle(D.battles[0]);
+      }
+    }, 500);
   }
 })();

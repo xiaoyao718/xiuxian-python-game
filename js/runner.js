@@ -346,4 +346,17 @@
   } else {
     scheduleScan();
   }
+
+  // ---------- 供大招/其它模块运行 Python（i3 P1c） ----------
+  // 成功 → { ok:true, text }; 运行库不可用 → { ok:false, unavailable:true }
+  window.App = window.App || {};
+  window.App.runPython = function (code) {
+    return ensureSkulpt()
+      .then(function () {
+        return executeCode(String(code || ""));
+      })
+      .catch(function () {
+        return Promise.resolve({ ok: false, unavailable: true, text: "" });
+      });
+  };
 })();

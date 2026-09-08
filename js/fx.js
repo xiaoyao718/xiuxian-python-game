@@ -79,14 +79,14 @@
     0: function (i) {
       return makeMote(i, true);
     },
-    // scene1 纹谱阁深夜：油灯尘埃——金色微粒极缓慢漂移
+    // scene1 纹谱阁深夜：地面尘埃——贴近地面缓慢浮动，制造室内朦胧感
     1: function (i) {
-      return makeMote(i, false);
+      return makeGroundDust(i);
     },
-    // scene2 灵兽苑清晨：晨雾光尘 + 上浮灵气泡
+    // scene2 灵兽苑清晨：晨雾、青白灵气与上浮灵息
     2: function (i) {
-      if (i % 3 === 0) return makeBubble(i);
-      return makeMote(i, true);
+      if (i % 2 === 0) return makeAura(i);
+      return makeBubble(i);
     },
     // scene3 测纹处日暮：3-5 只流萤（明灭 + 曲线游动）
     3: function (i) {
@@ -100,7 +100,7 @@
     5: function (i) {
       return makeLeaf(i);
     },
-    // scene6 渡劫：风卷残尘（雨丝仍由 CSS 负责）
+    // scene6 静台问心：留白，不以粒子制造紧张感。
     6: function (i) {
       return makeEmber(i);
     }
@@ -113,7 +113,7 @@
     3: mobileMode ? 3 : 5,
     4: mobileMode ? 20 : 60,
     5: mobileMode ? 8 : 20,
-    6: mobileMode ? 15 : 40
+    6: 0
   };
 
   var particles = [];
@@ -155,6 +155,28 @@
       color: "#9fd8cb",
       fade: 0.01
     };
+  }
+
+  function makeGroundDust(i) {
+    var p = makeMote(i, false, 0.32, "#b7aa8d");
+    p.y = rand(H * 0.64, H * 0.94);
+    p.x = rand(W * 0.12, W * 0.88);
+    p.r = rand(1.0, 2.7);
+    p.vx = rand(-0.11, 0.11);
+    p.vy = rand(-0.045, -0.008);
+    p.target = rand(0.08, 0.20);
+    return p;
+  }
+
+  function makeAura(i) {
+    var p = makeBubble(i);
+    p.x = rand(W * 0.08, W * 0.92);
+    p.y = rand(H * 0.24, H * 0.84);
+    p.r = rand(1.4, 3.4);
+    p.vy = rand(-0.28, -0.08);
+    p.target = rand(0.16, 0.34);
+    p.color = "#b9f1dd";
+    return p;
   }
 
   function makeFirefly(i) {

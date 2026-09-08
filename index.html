@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>修仙学 Python · 仓绝大陆</title>
-  <meta name="description" content="《修仙学 Python》剧情闯关网页游戏·第一卷「仓绝初醒」：0 基础学习者随主角林慕，在仓绝大陆上一关关学会 print、变量、input、if 与 for，亲手写代码渡劫筑基。">
+  <meta name="description" content="《修仙学 Python》剧情闯关网页游戏·第一卷「仓绝初醒」：0 基础学习者随主角林慕，在仓绝大陆上一关关学会 print、变量、input、if 与 for，亲手校正心诀、问心筑基。">
   <meta name="theme-color" content="#0e0c09">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_CN">
   <meta property="og:title" content="修仙学 Python · 仓绝大陆">
-  <meta property="og:description" content="以 Python 入门的剧情闯关修仙游戏：卷1「仓绝初醒」，从 print 到筑基渡劫，边读故事边学代码。">
+  <meta property="og:description" content="以 Python 入门的剧情闯关修仙游戏：卷1「仓绝初醒」，从 print 到筑基问心，边读故事边学代码。">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-bold.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=0908i">
 </head>
 <body>
   <div id="app">
@@ -58,6 +58,10 @@
       </div>
     </aside>
     <div id="sideMask" aria-hidden="true"></div>
+    <button id="immersionToggle" class="immersion-toggle" type="button"
+      aria-label="展开章节导航" aria-controls="sidebar" aria-expanded="false">
+      <span aria-hidden="true">卷</span><b>章节</b>
+    </button>
     <main id="main">
       <div class="stage-box" id="stageBox"></div>
     </main>
@@ -98,11 +102,15 @@
   <div id="fx" class="fx-hidden"></div>
   <div id="sceneFade" aria-hidden="true"></div>
   <div id="flashHit" aria-hidden="true"></div>
-  <script src="js/data.js"></script>
-  <script src="js/game.js"></script>
-  <script src="js/sound.js"></script>
-  <script src="js/runner.js"></script>
-  <script src="js/fx.js"></script>
-  <script src="js/pet.js"></script>
+  <script src="js/data.js?v=0908g"></script>
+  <script src="js/game.js?v=0908h"></script>
+  <script src="js/sound.js?v=0908g"></script>
+  <script src="js/runner.js?v=0906d"></script>
+  <script src="js/fx.js?v=0908g"></script>
+  <script src="js/pet.js?v=0906d"></script>
+  <script src="js/balance.js?v=0906d"></script>
+  <script src="js/sprites.js?v=0906d"></script>
+  <script src="js/battle-core.js?v=0906d"></script>
+  <script src="js/battle.js?v=0906d"></script>
 </body>
 </html>

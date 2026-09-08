@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#131a22"/>
+      <stop offset="0.55" stop-color="#0b0e13"/>
+      <stop offset="1" stop-color="#060403"/>
+    </linearGradient>
+    <radialGradient id="gold" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#c8a44b" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#c8a44b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shaft" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffe1a0" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffe1a0" stop-opacity="0.16"/>
+    </linearGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+
+  <!-- 云海 -->
+  <ellipse cx="420" cy="330" rx="520" ry="150" fill="#76837a" opacity="0.08" filter="url(#soft)"/>
+  <ellipse cx="1220" cy="270" rx="560" ry="170" fill="#76837a" opacity="0.07" filter="url(#soft)"/>
+  <ellipse cx="830" cy="620" rx="760" ry="170" fill="#55655d" opacity="0.10" filter="url(#soft)"/>
+
+  <!-- 远山剪影 -->
+  <path d="M0 620 L210 470 L380 580 L560 430 L760 590 L970 460 L1160 600 L1340 480 L1600 620 L1600 900 L0 900 Z" fill="#0d1218" opacity="0.9"/>
+  <path d="M0 700 L180 570 L360 660 L620 520 L860 680 L1120 540 L1380 690 L1600 580 L1600 900 L0 900 Z" fill="#080b10" opacity="0.94"/>
+
+  <!-- 天光与宗门残影 -->
+  <ellipse cx="1180" cy="180" rx="360" ry="240" fill="url(#gold)"/>
+  <rect x="300" y="90" width="90" height="560" rx="45" fill="url(#shaft)" opacity="0.55"/>
+  <rect x="1240" y="60" width="70" height="640" rx="35" fill="url(#shaft)" opacity="0.45"/>
+  <path d="M1080 900 L1140 720 L1160 660 L1180 720 L1240 900 Z" fill="#07090d"/>
+
+  <!-- 地面平台剪影（供对战站位） -->
+  <path d="M0 840 Q400 800 800 840 Q1200 880 1600 840 L1600 900 L0 900 Z" fill="#050302"/>
+  <path d="M180 900 L270 830 L470 830 L560 900 Z" fill="#0a0806" opacity="0.95"/>
+  <path d="M1080 900 L1140 830 L1360 830 L1420 900 Z" fill="#0a0806" opacity="0.95"/>
+  <path d="M180 900 L270 830 L470 830 L560 900 Z" fill="none" stroke="#c8a44b" stroke-width="1" opacity="0.12"/>
+  <path d="M1080 900 L1140 830 L1360 830 L1420 900 Z" fill="none" stroke="#c8a44b" stroke-width="1" opacity="0.12"/>
+</svg>

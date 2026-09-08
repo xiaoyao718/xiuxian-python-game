@@ -381,6 +381,152 @@
     });
   }
 
+  // ---------- i3 P1a：回合战斗数据 / 像素数据 / 战斗数值校验 ----------
+  function loadSprites() {
+    if (isNode) {
+      try {
+        var fs2 = require("fs");
+        var vm2 = require("vm");
+        var path2 = require("path");
+        var src2 = fs2.readFileSync(path2.join(ROOT, "js", "sprites.js"), "utf8");
+        var sand2 = { window: {} };
+        vm2.createContext(sand2);
+        vm2.runInContext(src2, sand2, { filename: "js/sprites.js" });
+        return sand2.window.SPRITES || null;
+      } catch (e) {
+        bad("sprites", "js/sprites.js 载入失败：" + e.message);
+        return null;
+      }
+    }
+    return window.SPRITES || null;
+  }
+
+  function validateBattlesAndSprites(levelIds) {
+    var battles = D.battles;
+    if (!battles || !Array.isArray(battles) || !battles.length) {
+      bad("battles", "GAME_DATA.battles 缺失或为空");
+      return;
+    }
+    ok("battles", battles.length + " 场反派对决");
+    var seenB = {};
+    var sprites = loadSprites();
+    var petDefs = {};
+    (D.pets || []).forEach(function (p) {
+      petDefs[p.id] = true;
+    });
+
+    battles.forEach(function (bt, i) {
+      var loc = "battles[" + i + "]";
+      if (!bt || typeof bt !== "object" || typeof bt.id !== "string" || !bt.id) {
+        bad(loc, "缺少字符串 id");
+        return;
+      }
+      if (seenB[bt.id]) bad(loc + ".id", "id 重复：" + bt.id);
+      else seenB[bt.id] = true;
+      if (levelIds.indexOf(bt.levelId) === -1) {
+        bad(loc + ".levelId", "指向关卡 " + bt.levelId + " 不存在");
+      } else {
+        ok(loc + ".levelId", bt.levelId);
+      }
+      var e = bt.enemy;
+      if (!e || typeof e !== "object") {
+        bad(loc + ".enemy", "缺少 enemy");
+        return;
+      }
+      ["id", "name"].forEach(function (k) {
+        if (typeof e[k] !== "string" || !e[k]) bad(loc + ".enemy." + k, "缺少 " + k);
+      });
+      if (typeof e.glyph !== "string" || e.glyph.length !== 1) {
+        bad(loc + ".enemy.glyph", "glyph 应为单字");
+      } else {
+        ok(loc + ".enemy.glyph", e.glyph);
+      }
+      if (typeof e.hue !== "string" || !/^#[0-9a-fA-F]{6}$/.test(e.hue)) {
+        bad(loc + ".enemy.hue", "hue 应为 #rrggbb");
+      }
+      if (typeof e.intro !== "string" || !e.intro) bad(loc + ".enemy.intro", "缺少登场台词");
+      if (!Array.isArray(e.taunt) || e.taunt.length < 3) {
+        bad(loc + ".enemy.taunt", "taunt 应 >=3 句");
+      } else {
+        ok(loc + ".enemy.taunt", e.taunt.length + " 句");
+      }
+      if (typeof e.win !== "string" || !e.win) bad(loc + ".enemy.win", "缺少战败台词");
+      if (typeof e.rivalWin !== "string" || !e.rivalWin) {
+        bad(loc + ".enemy.rivalWin", "缺少 rivalWin（战败后变体）");
+      }
+      if (sprites && typeof e.sprite === "string" && !sprites[e.sprite]) {
+        bad(loc + ".enemy.sprite", "sprite " + e.sprite + " 未在 js/sprites.js 定义");
+      }
+      // 找茬题索引：8 个且都指向存在的 petQuests 题
+      if (!Array.isArray(e.trap) || e.trap.length < 8) {
+        bad(loc + ".enemy.trap", "找茬题索引应 >=8，当前 " + (e.trap && e.trap.length));
+      } else {
+        var badRefs = e.trap.filter(function (r) {
+          return !(
+            r && petDefs[r.pet] && D.petQuests[r.pet] &&
+            D.petQuests[r.pet][r.group] && D.petQuests[r.pet][r.group][r.q]
+          );
+        });
+        if (badRefs.length) {
+          bad(loc + ".enemy.trap", badRefs.length + " 个引用无效");
+        } else {
+          ok(loc + ".enemy.trap", e.trap.length + " 个引用有效");
+        }
+      }
+      var u = bt.ult;
+      if (!u || typeof u !== "object") {
+        bad(loc + ".ult", "缺少大招题");
+      } else {
+        ["lead", "expected", "hint"].forEach(function (k) {
+          if (typeof u[k] !== "string" || !u[k]) bad(loc + ".ult." + k, "缺少 " + k);
+        });
+      }
+    });
+
+    // sprites：结构与帧数据
+    var needIds = ["linmu", "lintao", "zhouxian", "zhang", "wolf_king", "night_patrol"];
+    if (!sprites) {
+      bad("sprites", "SPRITES 缺失");
+      return;
+    }
+    needIds.forEach(function (id) {
+      var s = sprites[id];
+      var loc = "sprites." + id;
+      if (!s || typeof s !== "object") {
+        bad(loc, "缺失角色 " + id);
+        return;
+      }
+      if (s.size !== 16) bad(loc + ".size", "size 应为 16");
+      if (!Array.isArray(s.pal) || !s.pal.length) bad(loc + ".pal", "pal 缺失");
+      var palLen = (s.pal || []).length;
+      ["idle", "attack", "hit", "defeat"].forEach(function (fk) {
+        var frames = s.frames && s.frames[fk];
+        var expect = fk === "hit" || fk === "defeat" ? 1 : 2;
+        if (!Array.isArray(frames) || frames.length !== expect) {
+          bad(loc + ".frames." + fk, "帧数应为 " + expect);
+          return;
+        }
+        frames.forEach(function (m, fi) {
+          var badIdx = 0;
+          var badLen = 0;
+          for (var y = 0; y < 16; y++) {
+            var row = m[y];
+            if (!row || row.length !== 16) {
+              badLen++;
+              continue;
+            }
+            row.forEach(function (v) {
+              if (!(v >= 0 && v < palLen)) badIdx++;
+            });
+          }
+          if (badLen) bad(loc + ".frames." + fk + "[" + fi + "]", "存在非 16×16 行");
+          if (badIdx) bad(loc + ".frames." + fk + "[" + fi + "]", badIdx + " 个 pal 索引越界");
+        });
+      });
+      ok(loc, "结构与帧数据合法");
+    });
+  }
+
   // ---------- 主流程 ----------
   if (!loadData()) {
     printSummary();
@@ -466,6 +612,7 @@
   validateAchievements(levelIds);
   validateBagData(levelIds);
   validateArtifacts(levelIds);
+  validateBattlesAndSprites(levelIds);
 
   printSummary();
 
