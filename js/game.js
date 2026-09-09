@@ -607,11 +607,10 @@
     );
   }
 
-  // ---------- 侧栏：山河修行路线图（i2-2 S3） ----------
-  // 纵向画卷：内联 SVG 弯曲路径 + 灵纹盘节点（done=朱印过 / current=金圈脉动 /
-  // locked=灰暗云遮）。通关新段触发一次“金线流淌”（仅桌面且非 reduced-motion）。
-  const MAP_STEP = 62; // 节点纵向间距（px），与 CSS 视觉高度对齐
-  const MAP_TOP = 4; // 第一个节点顶部偏移
+  // ---------- 侧栏：按卷收纳的修行路线图 ----------
+  // 默认只展开当前所在的卷；用户手动展开/收起的状态在本次页面会话中保持，
+  // 这样章节增加后侧栏不会被一长串节点挤满。
+  const expandedVolumes = Object.create(null);
 
   function volumeOfLevel(lv) {
     const all = Array.isArray(D.volumes) ? D.volumes : [];
@@ -620,14 +619,24 @@
     return all[0] || { id: "v1", name: D.meta.volume, start: 0 };
   }
 
-  function isVolumeStart(i) {
-    return i > 0 && volumeOfLevel(D.levels[i]).id !== volumeOfLevel(D.levels[i - 1]).id;
+  function volumeList() {
+    const listed = Array.isArray(D.volumes) && D.volumes.length ? D.volumes.slice() : [];
+    const known = Object.create(null);
+    listed.forEach(function (volume) { known[volume.id] = true; });
+    D.levels.forEach(function (lv) {
+      const volume = volumeOfLevel(lv);
+      if (!known[volume.id]) {
+        listed.push(volume);
+        known[volume.id] = true;
+      }
+    });
+    return listed;
   }
 
-  function mapY(i) {
-    let breaks = 0;
-    for (let n = 1; n <= i; n++) if (isVolumeStart(n)) breaks++;
-    return MAP_TOP + i * MAP_STEP + breaks * 34;
+  function isVolumeExpanded(volumeId, focusVolumeId) {
+    return Object.prototype.hasOwnProperty.call(expandedVolumes, volumeId)
+      ? expandedVolumes[volumeId]
+      : volumeId === focusVolumeId;
   }
 
   function renderRoadmap(animateNew) {
@@ -641,35 +650,18 @@
       '<span class="realm-cell"><span class="realm-glow">' + esc(currentRealm()) + "</span></span>" +
       " · 进度 " + esc(progressText());
 
-    const n = D.levels.length;
-    const totalH = mapY(n - 1) + MAP_STEP + 44;
-    const litSeg = animateNew ? state.done.length - 1 : -1; // 新点亮的连接段下标
-
-    // 连接段状态：第 i 段连接 i → i+1；其终点被点亮即 done，指向“当前”节点则脉动
-    const segState = [];
-    for (let i = 0; i < n - 1; i++) {
-      if (isDone(D.levels[i + 1].id)) {
-        segState.push("done");
-      } else if (first === i + 1) {
-        segState.push("current");
-      } else {
-        segState.push("locked");
-      }
-    }
-
-    let segHtml = "";
-    for (let i = 0; i < n - 1; i++) {
-      const y0 = mapY(i) + 17;
-      const y1 = mapY(i + 1) + 17;
-      let cls = "map-seg " + segState[i];
-      if (i === litSeg && litSeg >= 0 && !reducedMotion) cls += " just-lit";
-      segHtml +=
-        '<path class="' + cls + '" pathLength="1" d="M 17 ' + y0 +
-        " C 54 " + y0 + ", 54 " + y1 + ", 17 " + y1 + '"></path>';
-    }
-
-    const nodesHtml = D.levels
-      .map(function (lv, i) {
+    const focusVolumeId = volumeOfLevel(focusLv).id;
+    const groupsHtml = volumeList()
+      .map(function (volume) {
+        const items = D.levels
+          .map(function (lv, i) { return { lv: lv, i: i }; })
+          .filter(function (item) { return volumeOfLevel(item.lv).id === volume.id; });
+        if (!items.length) return "";
+        const expanded = isVolumeExpanded(volume.id, focusVolumeId);
+        const doneCount = items.filter(function (item) { return isDone(item.lv.id); }).length;
+        const nodesHtml = items.map(function (item) {
+          const lv = item.lv;
+          const i = item.i;
         const done = isDone(lv.id);
         const current = i === first;
         const cls = done ? "map-node done" : current ? "map-node current" : "map-node locked";
@@ -678,14 +670,8 @@
         const aria = canClick
           ? "重游 " + lv.chapter + "·" + lv.title
           : "尚未解锁：" + lv.chapter + "·" + lv.title;
-        const divider = isVolumeStart(i)
-          ? '<div class="map-volume" style="top:' + (mapY(i) - 27) + 'px">' +
-            esc(volumeOfLevel(lv).name) + "</div>"
-          : "";
         return (
-          divider +
           '<button class="' + cls + '" data-i="' + i + '" type="button"' +
-          ' style="top:' + mapY(i) + 'px"' +
           ' aria-label="' + esc(aria) + '"' +
           (canClick ? ' title="重游本章"' : "") + ">" +
           '<span class="map-seal">' + sealChar + "</span>" +
@@ -693,17 +679,29 @@
           "<small>" + esc(lv.stageLabel) + "</small></span>" +
           "</button>"
         );
+        }).join("");
+        return (
+          '<section class="volume-group' + (expanded ? " expanded" : "") + '">' +
+          '<button class="volume-toggle" data-volume="' + esc(volume.id) + '" type="button" aria-expanded="' + expanded + '">' +
+          '<span class="volume-toggle-mark" aria-hidden="true">' + (expanded ? "−" : "＋") + "</span>" +
+          '<span class="volume-toggle-title">' + esc(volume.name) + "</span>" +
+          '<span class="volume-toggle-count">' + doneCount + "/" + items.length + "</span>" +
+          "</button>" +
+          '<div class="volume-steps"' + (expanded ? "" : ' hidden="hidden"') + ">" + nodesHtml + "</div>" +
+          "</section>"
+        );
       })
       .join("");
 
-    box.innerHTML =
-      '<div class="map-scroll" style="height:' + totalH + 'px">' +
-      '<svg class="map-track" viewBox="0 0 100 ' + totalH +
-      '" preserveAspectRatio="none" aria-hidden="true">' +
-      segHtml +
-      "</svg>" +
-      nodesHtml +
-      "</div>";
+    box.innerHTML = '<div class="map-scroll">' + groupsHtml + "</div>";
+
+    box.querySelectorAll(".volume-toggle").forEach(function (toggle) {
+      toggle.addEventListener("click", function () {
+        const volumeId = toggle.getAttribute("data-volume");
+        expandedVolumes[volumeId] = !isVolumeExpanded(volumeId, focusVolumeId);
+        renderRoadmap(false);
+      });
+    });
 
     box.querySelectorAll(".map-node.done, .map-node.current").forEach(function (node) {
       node.addEventListener("click", function () {

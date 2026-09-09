@@ -5760,3 +5760,92 @@ html[data-scene="8"] .env-art {
   letter-spacing: 2px;
   pointer-events: none;
 }
+
+/* 卷级收纳：侧栏先呈现卷，再按需展开其中的章节。 */
+.map-scroll {
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+  height: auto !important;
+}
+
+.volume-group {
+  border: 1px solid rgba(211, 186, 123, 0.16);
+  border-radius: 7px;
+  overflow: hidden;
+  background: linear-gradient(115deg, rgba(11, 15, 13, 0.28), rgba(91, 72, 41, 0.08));
+}
+
+.volume-toggle {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 0;
+  background: transparent;
+  color: rgba(235, 218, 177, 0.92);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.volume-toggle:hover,
+.volume-toggle:focus-visible {
+  outline: none;
+  background: rgba(200, 164, 75, 0.1);
+  color: #f4e3b8;
+}
+
+.volume-toggle-mark {
+  width: 18px;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1;
+  text-align: center;
+}
+
+.volume-toggle-title {
+  min-width: 0;
+  flex: 1;
+}
+
+.volume-toggle-count {
+  color: rgba(222, 207, 171, 0.58);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+}
+
+.volume-steps {
+  display: grid;
+  gap: 2px;
+  padding: 4px 8px 9px;
+  border-top: 1px solid rgba(211, 186, 123, 0.1);
+}
+
+.volume-steps[hidden] {
+  display: none;
+}
+
+.volume-steps .map-node {
+  position: relative;
+  left: auto;
+  right: auto;
+  width: 100%;
+  min-height: 46px;
+  padding: 5px 2px;
+}
+
+.volume-steps .map-node + .map-node {
+  border-top: 1px solid rgba(233, 225, 204, 0.055);
+}
+
+.volume-steps .map-node.locked {
+  opacity: 0.64;
+}
