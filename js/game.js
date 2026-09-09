@@ -11,7 +11,7 @@
   const LS_KEY_V1 = "xiuxian-python-game-v1";
   const LABEL = ["甲", "乙", "丙", "丁"];
   // 山河路线图：节点序数（终章用“劫”）
-  const MAP_SEAL = ["一", "二", "三", "四", "五", "劫"];
+  const MAP_SEAL = ["一", "二", "三", "四", "五", "劫", "字"];
   const reducedMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // 打字机速度：字/秒（约 40–60，可按需调高 TYPE_CPS）
@@ -511,8 +511,9 @@
       return;
     }
     if (cur.phase && cur.li >= 0 && D.levels[cur.li]) {
-      // lv1..lv5 → 1..5，boss（li=5）→ 6
-      setScene(cur.li + 1);
+      const lv = D.levels[cur.li];
+      // 旧关卡沿用原场景编号；新卷可显式指定场景，避免章节序号绑死美术。
+      setScene(typeof lv.scene === "number" ? lv.scene : cur.li + 1);
     }
   }
 
@@ -612,22 +613,36 @@
   const MAP_STEP = 62; // 节点纵向间距（px），与 CSS 视觉高度对齐
   const MAP_TOP = 4; // 第一个节点顶部偏移
 
+  function volumeOfLevel(lv) {
+    const all = Array.isArray(D.volumes) ? D.volumes : [];
+    const id = (lv && lv.volumeId) || "v1";
+    for (let i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
+    return all[0] || { id: "v1", name: D.meta.volume, start: 0 };
+  }
+
+  function isVolumeStart(i) {
+    return i > 0 && volumeOfLevel(D.levels[i]).id !== volumeOfLevel(D.levels[i - 1]).id;
+  }
+
   function mapY(i) {
-    return MAP_TOP + i * MAP_STEP;
+    let breaks = 0;
+    for (let n = 1; n <= i; n++) if (isVolumeStart(n)) breaks++;
+    return MAP_TOP + i * MAP_STEP + breaks * 34;
   }
 
   function renderRoadmap(animateNew) {
     const box = document.getElementById("roadmap");
     const tip = document.getElementById("heroTip");
-    document.getElementById("volumeName").textContent = D.meta.volume;
+    const first = firstUndone();
+    const focusLv = D.levels[first === -1 ? D.levels.length - 1 : first];
+    document.getElementById("volumeName").textContent = volumeOfLevel(focusLv).name;
     tip.innerHTML =
       "主角：" + esc(D.meta.hero) + " · 境界：" +
       '<span class="realm-cell"><span class="realm-glow">' + esc(currentRealm()) + "</span></span>" +
       " · 进度 " + esc(progressText());
 
-    const first = firstUndone();
     const n = D.levels.length;
-    const totalH = MAP_TOP + n * MAP_STEP + 44;
+    const totalH = mapY(n - 1) + MAP_STEP + 44;
     const litSeg = animateNew ? state.done.length - 1 : -1; // 新点亮的连接段下标
 
     // 连接段状态：第 i 段连接 i → i+1；其终点被点亮即 done，指向“当前”节点则脉动
@@ -663,7 +678,12 @@
         const aria = canClick
           ? "重游 " + lv.chapter + "·" + lv.title
           : "尚未解锁：" + lv.chapter + "·" + lv.title;
+        const divider = isVolumeStart(i)
+          ? '<div class="map-volume" style="top:' + (mapY(i) - 27) + 'px">' +
+            esc(volumeOfLevel(lv).name) + "</div>"
+          : "";
         return (
+          divider +
           '<button class="' + cls + '" data-i="' + i + '" type="button"' +
           ' style="top:' + mapY(i) + 'px"' +
           ' aria-label="' + esc(aria) + '"' +
@@ -774,9 +794,11 @@
 
   function topMeta(li) {
     const lv = D.levels[li];
+    const volume = volumeOfLevel(lv);
+    const chapter = volume.id === "v1" ? lv.chapter : volume.short + " · " + lv.chapter;
     return (
       '<div class="scene-head">' +
-      '<span class="chapter-tag">' + esc(lv.chapter) + "</span>" +
+      '<span class="chapter-tag">' + esc(chapter) + "</span>" +
       '<span class="stage-target">目标境界 · ' + esc(lv.stageLabel) + "</span>" +
       "</div>" +
       '<h2 class="scene-title">' + esc(lv.title) + "</h2>" +
@@ -786,9 +808,11 @@
 
   function miniHead(li) {
     const lv = D.levels[li];
+    const volume = volumeOfLevel(lv);
+    const chapter = volume.id === "v1" ? lv.chapter : volume.short + " · " + lv.chapter;
     return (
       '<div class="scene-head mini">' +
-      '<span class="chapter-tag">' + esc(lv.chapter) + "</span>" +
+      '<span class="chapter-tag">' + esc(chapter) + "</span>" +
       '<span class="mini-title">' + esc(lv.title) + "</span>" +
       '<span class="stage-target">' + esc(lv.stageLabel) + "</span>" +
       "</div>"
@@ -1937,10 +1961,6 @@
   }
 
   function afterOutro() {
-    if (D.levels[cur.li].kind === "boss") {
-      finale();
-      return;
-    }
     const next = cur.li + 1;
     if (next < D.levels.length) {
       goStory(next);
@@ -2154,6 +2174,13 @@
 
   // ---------- 第一卷完结 ----------
   function finale() {
+    const lastLv = D.levels[D.levels.length - 1];
+    const isSecondVolume = volumeOfLevel(lastLv).id === "v2";
+    const volumeTitle = isSecondVolume ? "第二卷 · 待续" : "第一卷 · 收卷";
+    const volumeSub = isSecondVolume ? "字海拾遗 · 开篇已启" : "修仙学 Python · 入门篇已毕";
+    const volumeDesc = isSecondVolume
+      ? "你已随林慕读懂传讯残简的第一层字序。字符串的索引、切片与方法仍在前方，而列表的秘境尚未开启。<br>第二卷会继续沿 Python 学习路径推进，不会跳过基础。"
+      : "你已陪林慕从人人嘲笑的抄纹少年，走到亲手校正问心诀、灵台重铸。<br>下一卷预告：筑基之后，是字符串与列表的秘境——小师妹的笔记本里，藏着下一个副本。<br>下一卷开启前，先把这一卷所学收进自己的行囊。";
     cur.wipeNext = true;
     cur.finaleShown = true;
     cur.coverShown = false;
@@ -2162,12 +2189,10 @@
       '<div class="volume-final-mark" aria-hidden="true"><span>收</span><i></i><small>卷一</small></div>' +
       '<div class="finale-seal">筑</div>' +
       '<div class="volume-final-eyebrow">仓绝大陆 · 静台晨雾</div>' +
-      '<h2 class="finale-title">第一卷 · 收卷</h2>' +
-      '<p class="finale-sub">修仙学 Python · 入门篇已毕</p>' +
+      '<h2 class="finale-title">' + volumeTitle + "</h2>" +
+      '<p class="finale-sub">' + volumeSub + "</p>" +
       '<p class="finale-desc">' +
-      "你已陪林慕从人人嘲笑的抄纹少年，走到亲手校正问心诀、灵台重铸。<br>" +
-      "下一卷预告：筑基之后，是字符串与列表的秘境——小师妹的笔记本里，藏着下一个副本。<br>" +
-      "下一卷开启前，先把这一卷所学收进自己的行囊。" +
+      volumeDesc +
       "</p>" +
       '<div class="volume-final-ledger"><span>已过 · 六章</span><span>所得 · 筑基心诀</span><span>待启 · 列表与字符串</span></div>' +
       '<div class="btn-row center-row">' +
