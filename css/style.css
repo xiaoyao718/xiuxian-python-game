@@ -5849,3 +5849,179 @@ html[data-scene="8"] .env-art {
 .volume-steps .map-node.locked {
   opacity: 0.64;
 }
+
+/* 卷首 / 收卷：不是海报卡，而是可步入、可停留的叙事场景。 */
+.volume-scene {
+  position: relative;
+  isolation: isolate;
+  min-height: min(690px, calc(100vh - 56px));
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: clamp(38px, 6vw, 86px);
+  border: 1px solid rgba(211, 189, 132, 0.22);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.32);
+  background-color: #11100e;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.volume-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.volume-scene--opening {
+  justify-content: flex-end;
+  background-image: url("../assets/scenes/volume1-threshold-rain-v2.png");
+  background-position: center;
+}
+
+.volume-scene--opening::before {
+  background:
+    linear-gradient(90deg, rgba(5, 7, 8, 0.82) 0%, rgba(6, 8, 9, 0.66) 36%, rgba(6, 8, 9, 0.16) 72%, rgba(6, 8, 9, 0.05) 100%),
+    linear-gradient(0deg, rgba(3, 4, 4, 0.52), transparent 42%);
+}
+
+.volume-scene--closing {
+  justify-content: flex-start;
+  background-image: url("../assets/scenes/volume1-quiet-terrace-dawn-v2.png");
+  background-position: center;
+}
+
+.volume-scene--closing::before {
+  background:
+    linear-gradient(90deg, rgba(15, 20, 21, 0.78) 0%, rgba(16, 21, 21, 0.58) 40%, rgba(16, 21, 21, 0.16) 68%, rgba(16, 21, 21, 0.02) 100%),
+    linear-gradient(0deg, rgba(10, 13, 14, 0.48), transparent 47%);
+}
+
+.volume-scene--v2 {
+  background-image: url("../assets/scenes/v2-message-archive-dawn-v1.png");
+}
+
+.volume-scene-copy {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  padding: clamp(26px, 3vw, 42px);
+  border-left: 1px solid rgba(221, 189, 111, 0.52);
+  background: linear-gradient(105deg, rgba(10, 12, 12, 0.68), rgba(12, 15, 14, 0.35));
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+.volume-scene-kicker {
+  margin: 0 0 20px;
+  color: rgba(226, 204, 149, 0.78);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.volume-scene-title {
+  margin: 0;
+  color: #f1ead6;
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.56);
+}
+
+.volume-scene-quote {
+  margin: 26px 0 0;
+  color: rgba(227, 198, 126, 0.94);
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 22px);
+  letter-spacing: 0.08em;
+  line-height: 1.7;
+}
+
+.volume-scene-sub {
+  margin: 14px 0 0;
+  color: rgba(218, 198, 151, 0.78);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+}
+
+.volume-scene-desc {
+  margin: 22px 0;
+  color: rgba(236, 229, 211, 0.82);
+  font-size: 14px;
+  line-height: 2;
+}
+
+.volume-scene-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 28px;
+  color: rgba(229, 215, 178, 0.7);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.volume-scene-meta span {
+  padding: 6px 8px;
+  border-top: 1px solid rgba(224, 199, 131, 0.28);
+  border-bottom: 1px solid rgba(224, 199, 131, 0.13);
+}
+
+.volume-scene-action,
+.volume-scene-actions .btn {
+  min-width: 142px;
+}
+
+.volume-scene-actions {
+  justify-content: flex-start;
+  margin: 0;
+}
+
+.volume-scene-caption {
+  position: absolute;
+  z-index: 1;
+  right: clamp(20px, 4vw, 58px);
+  bottom: clamp(20px, 4vw, 44px);
+  margin: 0;
+  color: rgba(232, 215, 164, 0.64);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.35em;
+  writing-mode: vertical-rl;
+}
+
+@media (max-width: 760px) {
+  .volume-scene {
+    min-height: calc(100vh - 34px);
+    align-items: flex-end;
+    padding: 22px;
+    border-radius: 0;
+  }
+
+  .volume-scene--opening {
+    background-position: 45% center;
+  }
+
+  .volume-scene--closing {
+    background-position: 60% center;
+  }
+
+  .volume-scene::before {
+    background: linear-gradient(0deg, rgba(5, 7, 8, 0.9) 0%, rgba(5, 7, 8, 0.68) 48%, rgba(5, 7, 8, 0.08) 100%);
+  }
+
+  .volume-scene-copy {
+    padding: 24px 20px;
+    border-left: 0;
+    border-top: 1px solid rgba(221, 189, 111, 0.48);
+    background: rgba(7, 9, 9, 0.58);
+  }
+
+  .volume-scene-title { font-size: 38px; }
+  .volume-scene-desc { margin: 18px 0; }
+  .volume-scene-caption { display: none; }
+}

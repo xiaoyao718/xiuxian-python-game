@@ -826,18 +826,17 @@
     renderRoadmap();
     applyScene(0);
     stageBox.innerHTML =
-      '<div class="card cover-card wipe-card">' +
-      '<div class="scroll-rod scroll-rod-top" aria-hidden="true"></div>' +
-      '<div class="scroll-rod scroll-rod-bottom" aria-hidden="true"></div>' +
-      '<div class="cover-mark" aria-hidden="true"><span>启</span><i></i><small>卷一</small></div>' +
-      '<div class="cover-eyebrow">' + esc(D.meta.world) + " · Python 仙典</div>" +
-      '<div class="cover-title">' + esc(D.meta.title) + "</div>" +
-      '<div class="cover-quote">「早岁已知世事艰，仍许飞鸿荡云间。」</div>' +
-      '<div class="cover-sub">' + esc(D.meta.volume) + "</div>" +
-      '<div class="cover-desc">' + esc(D.meta.volumeDesc) + "</div>" +
-      '<div class="cover-ledger"><span>抄纹阁 · 子夜</span><span>第一卷 · 六章</span><span>从凡人至筑基</span></div>' +
-      '<div class="center"><button class="btn primary cover-start" onclick="App.start()" type="button">开始修行</button></div>' +
-      "</div>";
+      '<section class="volume-scene volume-scene--opening wipe-card">' +
+      '<div class="volume-scene-copy">' +
+      '<p class="volume-scene-kicker">仓绝大陆 · 纹谱阁外廊 · 子夜</p>' +
+      '<h1 class="volume-scene-title">' + esc(D.meta.title) + "</h1>" +
+      '<p class="volume-scene-quote">早岁已知世事艰，仍许飞鸿荡云间。</p>' +
+      '<p class="volume-scene-desc">雨声落在廊外。林慕推开纹谱阁的门，遗下多年的仙典，正等他重新落笔。</p>' +
+      '<div class="volume-scene-meta"><span>第一卷 · 仓绝初醒</span><span>六章修行</span><span>由凡入筑</span></div>' +
+      '<button class="btn primary volume-scene-action" onclick="App.start()" type="button">入阁修行</button>' +
+      "</div>" +
+      '<p class="volume-scene-caption" aria-hidden="true">门内有灯</p>' +
+      "</section>";
   }
 
   // ---------- 剧情 ----------
@@ -1961,10 +1960,19 @@
   function afterOutro() {
     const next = cur.li + 1;
     if (next < D.levels.length) {
-      goStory(next);
+      if (volumeOfLevel(D.levels[next]).id !== volumeOfLevel(D.levels[cur.li]).id) {
+        finale(cur.li);
+      } else {
+        goStory(next);
+      }
     } else {
       finale();
     }
+  }
+
+  function enterNextVolume() {
+    const next = cur.li + 1;
+    if (next < D.levels.length) goStory(next);
   }
 
   // ---------- 问心（A 类：写代码） ----------
@@ -2171,11 +2179,15 @@
   }
 
   // ---------- 第一卷完结 ----------
-  function finale() {
-    const lastLv = D.levels[D.levels.length - 1];
-    const isSecondVolume = volumeOfLevel(lastLv).id === "v2";
-    const volumeTitle = isSecondVolume ? "第二卷 · 待续" : "第一卷 · 收卷";
-    const volumeSub = isSecondVolume ? "字海拾遗 · 开篇已启" : "修仙学 Python · 入门篇已毕";
+  function finale(closedIndex) {
+    const index = typeof closedIndex === "number" ? closedIndex : D.levels.length - 1;
+    const closedLv = D.levels[index];
+    const closedVolume = volumeOfLevel(closedLv);
+    const nextLv = D.levels[index + 1];
+    const hasNextVolume = nextLv && volumeOfLevel(nextLv).id !== closedVolume.id;
+    const isSecondVolume = closedVolume.id === "v2";
+    const volumeTitle = hasNextVolume ? closedVolume.name + " · 收卷" : (isSecondVolume ? "第二卷 · 待续" : "第一卷 · 收卷");
+    const volumeSub = hasNextVolume ? "修仙学 Python · 入门篇已毕" : (isSecondVolume ? "字海拾遗 · 开篇已启" : "修仙学 Python · 入门篇已毕");
     const volumeDesc = isSecondVolume
       ? "你已随林慕读懂传讯残简的第一层字序。字符串的索引、切片与方法仍在前方，而列表的秘境尚未开启。<br>第二卷会继续沿 Python 学习路径推进，不会跳过基础。"
       : "你已陪林慕从人人嘲笑的抄纹少年，走到亲手校正问心诀、灵台重铸。<br>下一卷预告：筑基之后，是字符串与列表的秘境——小师妹的笔记本里，藏着下一个副本。<br>下一卷开启前，先把这一卷所学收进自己的行囊。";
@@ -2183,21 +2195,24 @@
     cur.finaleShown = true;
     cur.coverShown = false;
     stageBox.innerHTML =
-      '<div class="card finale-card volume-final-card">' +
-      '<div class="volume-final-mark" aria-hidden="true"><span>收</span><i></i><small>卷一</small></div>' +
-      '<div class="finale-seal">筑</div>' +
-      '<div class="volume-final-eyebrow">仓绝大陆 · 静台晨雾</div>' +
-      '<h2 class="finale-title">' + volumeTitle + "</h2>" +
-      '<p class="finale-sub">' + volumeSub + "</p>" +
-      '<p class="finale-desc">' +
+      '<section class="volume-scene volume-scene--closing' + (isSecondVolume ? " volume-scene--v2" : "") + '">' +
+      '<div class="volume-scene-copy">' +
+      '<p class="volume-scene-kicker">仓绝大陆 · 后山静台 · 晨雾初散</p>' +
+      '<h2 class="volume-scene-title">' + volumeTitle + "</h2>" +
+      '<p class="volume-scene-sub">' + volumeSub + "</p>" +
+      '<p class="volume-scene-desc">' +
       volumeDesc +
       "</p>" +
-      '<div class="volume-final-ledger"><span>已过 · 六章</span><span>所得 · 筑基心诀</span><span>待启 · 列表与字符串</span></div>' +
-      '<div class="btn-row center-row">' +
-      '<button class="btn ghost" onclick="App.cover()" type="button">回到封面</button>' +
-      '<button class="btn primary" onclick="App.reset()" type="button">重置进度，重头再修</button>' +
+      '<div class="volume-scene-meta"><span>已过 · 六章</span><span>所得 · 筑基心诀</span><span>待启 · 字海拾遗</span></div>' +
+      '<div class="btn-row volume-scene-actions">' +
+      '<button class="btn ghost" onclick="App.cover()" type="button">回看卷首</button>' +
+      (hasNextVolume
+        ? '<button class="btn primary" onclick="App.enterNextVolume()" type="button">前往第二卷</button>'
+        : '<button class="btn primary" onclick="App.reset()" type="button">重置进度，重头再修</button>') +
       "</div>" +
-      "</div>";
+      "</div>" +
+      '<p class="volume-scene-caption" aria-hidden="true">云海未尽</p>' +
+      "</section>";
     finishStage(7);
   }
 
@@ -2438,6 +2453,7 @@
     fillUndo: fillUndo,
     checkFill: checkFill,
     afterOutro: afterOutro,
+    enterNextVolume: enterNextVolume,
     submitBoss: submitBoss,
     copyExample: copyExample,
     copyBossCode: copyBossCode,
