@@ -5955,6 +5955,18 @@ html[data-scene="7"] .env-art {
   margin: 0;
 }
 
+/* 筑基问心：内爆式重铸，境界名在石台圆阵中浮现。 */
+.reforge-veil { animation: reforgePulse 3.9s ease both; }
+.reforge-core { position:absolute;left:50%;top:47%;width:min(34vw,260px);aspect-ratio:1;transform:translate(-50%,-50%) scale(.35);border:1px solid rgba(231,201,129,0);border-radius:50%;display:grid;place-content:center;text-align:center;opacity:0;z-index:3; }
+.reforge-core::before{content:"";position:absolute;inset:-15%;border:2px solid rgba(255,237,184,0);border-radius:50%;box-shadow:0 0 0 0 rgba(255,239,194,0)}
+.reforge-core b{color:#f1db9e;font:700 clamp(25px,4vw,44px) var(--font-display);letter-spacing:.17em;text-shadow:0 0 18px rgba(242,202,112,.75)}
+.reforge-core small{margin-top:10px;color:#d5b978;font-size:11px;letter-spacing:.35em}
+.reforge-veil .reforge-core{animation:reforgeCore 1.45s 2.05s cubic-bezier(.16,1,.3,1) both}.reforge-veil .break-inner{animation:reforgeText .5s 2.7s ease both}.reforge-veil .reforge-wash{animation:reforgeBurst .34s 1.82s ease-out both}
+@keyframes reforgePulse{0%,43%{filter:brightness(.56)}52%{filter:brightness(1.42)}100%{filter:brightness(1)}}
+@keyframes reforgeBurst{0%{opacity:.1;transform:scale(.2)}55%{opacity:.88;transform:scale(1.18)}100%{opacity:.18;transform:scale(1.65)}}
+@keyframes reforgeCore{0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}35%{opacity:1;transform:translate(-50%,-50%) scale(1.08);border-color:rgba(239,207,133,.75)}100%{opacity:1;transform:translate(-50%,-50%) scale(1);border-color:rgba(239,207,133,.42)}}
+@keyframes reforgeText{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
 @media (max-width: 760px) {
   .volume-reading,
   .volume-reading--closing {

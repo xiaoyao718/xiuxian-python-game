@@ -1812,6 +1812,7 @@
         '<div class="break-veil reforge-veil">' +
         '<div class="reforge-wash"></div>' +
         '<div class="reforge-stone"></div>' +
+        '<div class="reforge-core"><b>筑基初成</b><small>境界突破</small></div>' +
         '<div class="break-inner">' +
         '<div class="break-eyebrow">' + esc(eyebrow) + "</div>" +
         '<div class="break-old">' + esc(from) + "</div>" +

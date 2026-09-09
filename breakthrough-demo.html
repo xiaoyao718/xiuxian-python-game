@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>灵台重铸 · 突破小样</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;overflow:hidden;color:#e7dfca;font-family:STKaiti,serif;background:#101713}
+    .scene{position:fixed;inset:0;background:linear-gradient(rgba(9,14,12,.38),rgba(6,9,8,.82)),url('assets/scenes/boss-reforging-terrace-v1.webp') center/cover}
+    .mist{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 78%,rgba(181,191,160,.18),transparent 55%);animation:mist 12s ease-in-out infinite alternate}@keyframes mist{to{transform:translateY(-2%);opacity:.65}}
+    canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}.copy{position:fixed;left:50%;bottom:9vh;transform:translateX(-50%);width:min(560px,88vw);text-align:center;text-shadow:0 2px 14px #000}
+    .phase{font-size:12px;letter-spacing:.45em;color:#d2b16a}.title{margin:14px 0 8px;font-size:clamp(32px,5vw,54px);letter-spacing:.25em}.note{min-height:2em;color:rgba(234,226,204,.76);letter-spacing:.08em}.controls{position:fixed;right:24px;bottom:24px;display:flex;gap:10px}button{border:1px solid rgba(220,185,104,.6);background:rgba(10,14,12,.58);color:#ead9ab;padding:10px 15px;font:15px STKaiti,serif;cursor:pointer}button:hover{background:rgba(174,138,62,.22)}
+  </style>
+</head><body>
+  <div class="scene"><div class="mist"></div></div><canvas id="c"></canvas>
+  <div class="copy"><div class="phase">筑基 · 问心</div><div class="title" id="title">灵台重铸</div><div class="note" id="note">旧纹未灭，只待归位。</div></div>
+  <div class="controls"><button id="play">重演</button><button id="skip">收束</button></div>
+  <script>
+  const c=document.querySelector('#c'),x=c.getContext('2d'),title=document.querySelector('#title'),note=document.querySelector('#note');let start=0,stop=false;
+  function size(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;x.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}addEventListener('resize',size);size();
+  const dust=Array.from({length:58},(_,i)=>({a:i/58*Math.PI*2,d:.35+Math.random()*.8,s:1+Math.random()*2}));
+  function draw(t){const w=innerWidth,h=innerHeight,cx=w/2,cy=h*.49,r=Math.min(w,h)*.22;x.clearRect(0,0,w,h);let p=Math.min(1,(t-start)/4000);if(stop)p=1;let charge=Math.min(1,p/.42),burst=Math.max(0,Math.min(1,(p-.42)/.12)),settle=Math.max(0,(p-.54)/.46);
+    document.body.style.transform=burst>0&&burst<1?`translate(${(Math.random()-.5)*7*burst}px,${(Math.random()-.5)*5*burst}px)`:'translate(0,0)';
+    x.fillStyle=`rgba(3,6,5,${.38*charge*(1-burst)})`;x.fillRect(0,0,w,h);x.save();x.translate(cx,cy);x.globalCompositeOperation='screen';
+    dust.forEach(o=>{let k=charge*(1-burst),d=o.d*r*(1-k*.9);x.beginPath();x.arc(Math.cos(o.a)*d,Math.sin(o.a)*d,o.s,0,7);x.fillStyle=`rgba(230,196,116,${.12+.6*k})`;x.fill()});
+    if(burst){let rr=r*(.18+burst*1.9);x.beginPath();x.arc(0,0,rr,0,7);x.strokeStyle=`rgba(255,236,183,${(1-burst)*.92})`;x.lineWidth=10*(1-burst)+1;x.stroke();x.beginPath();x.arc(0,0,r*.16+burst*r*.65,0,7);x.fillStyle=`rgba(255,236,190,${(1-burst)*.72})`;x.fill()}
+    if(settle){x.globalAlpha=Math.min(1,settle*2.8);x.fillStyle='#f2deb0';x.font=`${Math.max(18,r*.19)}px STKaiti,serif`;x.textAlign='center';x.textBaseline='middle';x.shadowColor='#e4b95f';x.shadowBlur=18;x.fillText('筑基初成',0,0);x.font=`${Math.max(9,r*.065)}px STKaiti,serif`;x.fillStyle='#d9bd7a';x.shadowBlur=0;x.fillText('境界突破',0,r*.23)} x.restore();
+    if(p<.42){title.textContent='灵台重铸';note.textContent='旧纹在暗处苏醒。'}else if(p<.62){title.textContent='心诀归一';note.textContent='散掉的灵息，尽数归于一处。'}else{title.textContent='灵台已定';note.textContent='光已内敛，石台仍静。'}if(!stop&&p<1)requestAnimationFrame(draw)}
+  function play(){stop=false;start=performance.now();requestAnimationFrame(draw)}document.querySelector('#play').onclick=play;document.querySelector('#skip').onclick=()=>{stop=true;draw(performance.now())};play();
+  </script>
+</body></html>
