@@ -5705,3 +5705,17 @@ body.is-bag-open #bagPanel {
 
   .cover-card .cover-title { letter-spacing: 0.1em; }
 }
+
+/* 沉浸叙事的阅读起点下沉到视野中段，避免文本贴近上沿造成压迫。 */
+@media (min-width: 900px) {
+  body.is-immersive #main {
+    padding-top: clamp(76px, 10vh, 116px);
+    padding-bottom: 72px;
+  }
+}
+
+@media (max-width: 899px) {
+  body.is-immersive #main {
+    padding-top: 92px;
+  }
+}
