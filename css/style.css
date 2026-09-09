@@ -5850,6 +5850,120 @@ html[data-scene="8"] .env-art {
   opacity: 0.64;
 }
 
+/* 卷首/收卷同样进入全局场景层，只改变阅读内容，不另起一套页面。 */
+html[data-scene="0"] .env-art {
+  background-image: url("../assets/scenes/volume1-threshold-rain-v2.png");
+  background-position: center 50%;
+  opacity: 0.72;
+  filter: saturate(0.72) brightness(0.64) contrast(1.05);
+}
+
+:root[data-scene="0"] {
+  --scene-sky: linear-gradient(168deg, #17212a 0%, #0b1117 52%, #06090c 100%);
+  --fog-a: rgba(76, 98, 111, 0.18);
+  --fog-b: rgba(198, 151, 78, 0.08);
+  --light: rgba(222, 168, 82, 0.08);
+  --beam-o: 0.26;
+}
+
+html[data-scene="0"] .scene-far,
+html[data-scene="0"] .scene-clouds {
+  opacity: 0.08;
+}
+
+html[data-scene="7"] .env-art {
+  background-image: url("../assets/scenes/volume1-quiet-terrace-dawn-v2.png");
+  background-position: center 52%;
+  opacity: 0.66;
+  filter: saturate(0.68) brightness(0.68) contrast(1.03);
+}
+
+/* 同正文材质的卷级阅读层：不再绘制独立大图或改变页面尺度。 */
+.volume-reading {
+  width: min(660px, 100%);
+  margin: clamp(38px, 11vh, 108px) auto 56px;
+  padding: clamp(34px, 5vw, 62px);
+  border-color: rgba(209, 183, 113, 0.30);
+  background: linear-gradient(130deg, rgba(9, 12, 13, 0.60), rgba(12, 14, 14, 0.38));
+  -webkit-backdrop-filter: blur(10px) saturate(0.98);
+  backdrop-filter: blur(10px) saturate(0.98);
+  text-align: left;
+}
+
+.volume-reading--closing {
+  margin-top: clamp(64px, 14vh, 132px);
+}
+
+.volume-reading-kicker {
+  margin: 0 0 20px;
+  color: rgba(224, 202, 147, 0.76);
+  font-size: 11px;
+  letter-spacing: 0.19em;
+}
+
+.volume-reading-title {
+  margin: 0;
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5vw, 58px);
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.25;
+}
+
+.volume-reading-quote {
+  margin: 24px 0 0;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: clamp(17px, 2vw, 21px);
+  letter-spacing: 0.07em;
+  line-height: 1.7;
+}
+
+.volume-reading-sub {
+  margin: 13px 0 0;
+  color: rgba(223, 207, 170, 0.74);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+}
+
+.volume-reading-desc {
+  margin: 22px 0;
+  color: var(--paper-dim);
+  font-size: 14px;
+  line-height: 2;
+}
+
+.volume-reading-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 28px;
+  color: rgba(225, 209, 168, 0.68);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.volume-reading-meta span {
+  padding: 6px 8px;
+  border-top: 1px solid rgba(224, 199, 131, 0.27);
+  border-bottom: 1px solid rgba(224, 199, 131, 0.13);
+}
+
+.volume-reading-actions {
+  justify-content: flex-start;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .volume-reading,
+  .volume-reading--closing {
+    margin-top: 92px;
+    margin-bottom: 34px;
+    padding: 34px 24px;
+  }
+}
+
 /* 卷首 / 收卷：不是海报卡，而是可步入、可停留的叙事场景。 */
 .volume-scene {
   position: relative;

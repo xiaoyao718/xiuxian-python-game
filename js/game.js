@@ -826,17 +826,14 @@
     renderRoadmap();
     applyScene(0);
     stageBox.innerHTML =
-      '<section class="volume-scene volume-scene--opening wipe-card">' +
-      '<div class="volume-scene-copy">' +
-      '<p class="volume-scene-kicker">仓绝大陆 · 纹谱阁外廊 · 子夜</p>' +
-      '<h1 class="volume-scene-title">' + esc(D.meta.title) + "</h1>" +
-      '<p class="volume-scene-quote">早岁已知世事艰，仍许飞鸿荡云间。</p>' +
-      '<p class="volume-scene-desc">雨声落在廊外。林慕推开纹谱阁的门，遗下多年的仙典，正等他重新落笔。</p>' +
-      '<div class="volume-scene-meta"><span>第一卷 · 仓绝初醒</span><span>六章修行</span><span>由凡入筑</span></div>' +
-      '<button class="btn primary volume-scene-action" onclick="App.start()" type="button">入阁修行</button>' +
-      "</div>" +
-      '<p class="volume-scene-caption" aria-hidden="true">门内有灯</p>' +
-      "</section>";
+      '<div class="card volume-reading volume-reading--cover wipe-card">' +
+      '<p class="volume-reading-kicker">仓绝大陆 · 纹谱阁外廊 · 子夜</p>' +
+      '<h1 class="volume-reading-title">' + esc(D.meta.title) + "</h1>" +
+      '<p class="volume-reading-quote">早岁已知世事艰，仍许飞鸿荡云间。</p>' +
+      '<p class="volume-reading-desc">雨声落在廊外。林慕推开纹谱阁的门，遗下多年的仙典，正等他重新落笔。</p>' +
+      '<div class="volume-reading-meta"><span>第一卷 · 仓绝初醒</span><span>六章修行</span><span>由凡入筑</span></div>' +
+      '<button class="btn primary" onclick="App.start()" type="button">入阁修行</button>' +
+      "</div>";
   }
 
   // ---------- 剧情 ----------
@@ -2195,25 +2192,22 @@
     cur.finaleShown = true;
     cur.coverShown = false;
     stageBox.innerHTML =
-      '<section class="volume-scene volume-scene--closing' + (isSecondVolume ? " volume-scene--v2" : "") + '">' +
-      '<div class="volume-scene-copy">' +
-      '<p class="volume-scene-kicker">仓绝大陆 · 后山静台 · 晨雾初散</p>' +
-      '<h2 class="volume-scene-title">' + volumeTitle + "</h2>" +
-      '<p class="volume-scene-sub">' + volumeSub + "</p>" +
-      '<p class="volume-scene-desc">' +
+      '<div class="card volume-reading volume-reading--closing">' +
+      '<p class="volume-reading-kicker">仓绝大陆 · 后山静台 · 晨雾初散</p>' +
+      '<h2 class="volume-reading-title">' + volumeTitle + "</h2>" +
+      '<p class="volume-reading-sub">' + volumeSub + "</p>" +
+      '<p class="volume-reading-desc">' +
       volumeDesc +
       "</p>" +
-      '<div class="volume-scene-meta"><span>已过 · 六章</span><span>所得 · 筑基心诀</span><span>待启 · 字海拾遗</span></div>' +
-      '<div class="btn-row volume-scene-actions">' +
+      '<div class="volume-reading-meta"><span>已过 · 六章</span><span>所得 · 筑基心诀</span><span>待启 · 字海拾遗</span></div>' +
+      '<div class="btn-row volume-reading-actions">' +
       '<button class="btn ghost" onclick="App.cover()" type="button">回看卷首</button>' +
       (hasNextVolume
         ? '<button class="btn primary" onclick="App.enterNextVolume()" type="button">前往第二卷</button>'
         : '<button class="btn primary" onclick="App.reset()" type="button">重置进度，重头再修</button>') +
       "</div>" +
-      "</div>" +
-      '<p class="volume-scene-caption" aria-hidden="true">云海未尽</p>' +
-      "</section>";
-    finishStage(7);
+      "</div>";
+    finishStage(isSecondVolume ? 8 : 7);
   }
 
   // ---------- 复制代码 ----------
