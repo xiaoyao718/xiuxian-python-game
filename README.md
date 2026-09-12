@@ -183,6 +183,10 @@ node scripts/validate-data.js
 - 「灵笺辨伪」：`strip()` / `replace()` / `find()`
 - 「渡口密令」：字符串综合试炼
 
+列表篇已开启：
+
+- 「遗簿名录」：列表创建、索引与 `append()`；石匣中的多张残片由此被收拢为可继续查证的名录。
+
 成就印章 UI 仍暂缓；数据层已预留 `achievements` 扩展位与 `App.sfx("seal")` 音效钩子。
 
 ## 数据校验
