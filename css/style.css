@@ -5747,6 +5747,46 @@ html[data-scene="8"] .env-art {
   --beam-o: 0.45;
 }
 
+/* 第二卷场景递进：阁内辨卷 → 渡口查证 → 暗格发现。背景仍由全局氛围层承接。 */
+html[data-scene="9"] .env-art {
+  background-image: url("../assets/scenes/v2-archive-interior-dawn-v1.png");
+  background-position: center 52%;
+  opacity: 0.62;
+  filter: saturate(0.62) brightness(0.62) contrast(1.06);
+}
+
+:root[data-scene="9"] {
+  --scene-sky: radial-gradient(82% 70% at 78% 8%, rgba(203, 179, 113, 0.14), transparent 62%), linear-gradient(165deg, #26332d 0%, #111915 60%, #080c0a 100%);
+  --fog-a: rgba(147, 163, 137, 0.15); --fog-b: rgba(198, 175, 112, 0.08); --light: rgba(223, 196, 128, 0.09);
+  --m-far-a: rgba(105, 129, 108, 0.18); --m-far-b: rgba(16, 29, 21, 0.46); --cloud-a: rgba(196, 204, 176, 0.08); --cloud-b: rgba(218, 193, 130, 0.05); --cloud-c: rgba(109, 140, 120, 0.05); --beam-a: rgba(222, 197, 132, 0.07); --beam-b: rgba(231, 222, 187, 0.03); --beam-c: rgba(101, 135, 112, 0.03); --beam-o: 0.34;
+}
+
+html[data-scene="10"] .env-art {
+  background-image: url("../assets/scenes/v2-old-ferry-mist-v1.png");
+  background-position: center 54%;
+  opacity: 0.66;
+  filter: saturate(0.56) brightness(0.60) contrast(1.08);
+}
+
+:root[data-scene="10"] {
+  --scene-sky: radial-gradient(90% 68% at 20% 10%, rgba(180, 196, 188, 0.12), transparent 64%), linear-gradient(170deg, #273331 0%, #121c1d 58%, #090e10 100%);
+  --fog-a: rgba(161, 180, 172, 0.19); --fog-b: rgba(137, 165, 154, 0.10); --light: rgba(192, 203, 181, 0.07);
+  --m-far-a: rgba(104, 132, 126, 0.22); --m-far-b: rgba(18, 32, 34, 0.50); --cloud-a: rgba(190, 206, 197, 0.12); --cloud-b: rgba(150, 177, 168, 0.07); --cloud-c: rgba(94, 128, 123, 0.06); --beam-a: rgba(194, 208, 193, 0.06); --beam-b: rgba(220, 224, 207, 0.025); --beam-c: rgba(105, 146, 137, 0.03); --beam-o: 0.30;
+}
+
+html[data-scene="11"] .env-art {
+  background-image: url("../assets/scenes/v2-stele-hidden-archive-v1.png");
+  background-position: center 55%;
+  opacity: 0.64;
+  filter: saturate(0.52) brightness(0.52) contrast(1.10);
+}
+
+:root[data-scene="11"] {
+  --scene-sky: radial-gradient(78% 70% at 74% 6%, rgba(178, 157, 100, 0.10), transparent 62%), linear-gradient(170deg, #202a25 0%, #101713 59%, #070a08 100%);
+  --fog-a: rgba(119, 144, 125, 0.12); --fog-b: rgba(186, 159, 97, 0.07); --light: rgba(210, 184, 118, 0.07);
+  --m-far-a: rgba(84, 112, 93, 0.18); --m-far-b: rgba(12, 24, 16, 0.56); --cloud-a: rgba(155, 173, 152, 0.07); --cloud-b: rgba(184, 161, 105, 0.04); --cloud-c: rgba(84, 118, 96, 0.04); --beam-a: rgba(207, 178, 113, 0.05); --beam-b: rgba(220, 207, 170, 0.02); --beam-c: rgba(93, 128, 103, 0.02); --beam-o: 0.24;
+}
+
 .map-volume {
   position: absolute;
   left: 42px;
