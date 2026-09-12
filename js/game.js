@@ -777,6 +777,22 @@
     return art + body;
   }
 
+  // 第二卷的“见闻段”不是题目之间的单句过场，而是一小段可连续阅读的场景。
+  // 它复用既有对话组件，因此未来接入角色立绘时也会自然获得同一套呈现。
+  function sceneBeatHTML(scene) {
+    const lines = Array.isArray(scene && scene.lines) ? scene.lines : [];
+    const place = scene && scene.place ? '<div class="quest-scene-place">' + esc(scene.place) + "</div>" : "";
+    const title = scene && scene.title ? '<h3 class="quest-scene-title">' + esc(scene.title) + "</h3>" : "";
+    return (
+      '<section class="quest-scene">' +
+      '<div class="quest-scene-head">' + place + title + "</div>" +
+      '<div class="dialog-list quest-scene-lines">' +
+      lines.map(function (line, index) { return dialogHTML(lines, index, false); }).join("") +
+      "</div>" +
+      "</section>"
+    );
+  }
+
   function navHTML(opts) {
     let right = "";
     if (opts.skip) {
@@ -1060,6 +1076,10 @@
       paintQuestLesson(item.lesson);
       return;
     }
+    if (item.scene) {
+      paintQuestScene(item.scene);
+      return;
+    }
 
     const hasMore = cur.questPos + 1 < items.length;
     const canSkip = allNarrativeSeen("quest", items);
@@ -1074,6 +1094,27 @@
       (canSkip ? '<button class="btn ghost small" data-skip="1" onclick="App.questSkip()" type="button">略过已读剧情</button>' : "") +
       '<button class="btn primary" onclick="App.questContinue()" type="button">' +
       (hasMore ? "继续 ▸" : lastLabel) +
+      "</button>" +
+      "</div>" +
+      "</div>";
+    syncImmersiveMode();
+    finishStage();
+    startTypewriter(stageBox);
+    markNarrativeSeen("quest", cur.questPos);
+  }
+
+  function paintQuestScene(scene) {
+    const items = questItems();
+    const hasMore = cur.questPos + 1 < items.length;
+    const canSkip = allNarrativeSeen("quest", items);
+    stageBox.innerHTML =
+      '<div class="card quest-scene-card">' +
+      miniHead(cur.li) +
+      sceneBeatHTML(scene) +
+      '<div class="btn-row">' +
+      (canSkip ? '<button class="btn ghost small" data-skip="1" onclick="App.questSkip()" type="button">略过已读剧情</button>' : "") +
+      '<button class="btn primary" onclick="App.questContinue()" type="button">' +
+      (hasMore ? "继续故事 ▸" : "继续 ▸") +
       "</button>" +
       "</div>" +
       "</div>";
@@ -1144,7 +1185,7 @@
       const hasMoreItems = cur.questPos + 1 < items.length;
       const willIntro = isLastQ && !hasMoreItems && quizIntroEnabled(lv);
       return {
-        head: "灵纹浮现 · 第 " + (qi + 1) + " / " + totalQ + " 问",
+        head: (lv.volumeId === "v2" ? "当下行动" : "灵纹浮现") + " · 第 " + (qi + 1) + " / " + totalQ + " 问",
         backLabel: "回看讲解",
         backAction: "App.backLesson()",
         doneLabel: hasMoreItems || willIntro ? "继续 ▸" : "突破境界",
@@ -1253,6 +1294,7 @@
       miniHead(cur.li) +
       qiMeterHTML() +
       '<div class="quiz-head">' + esc(info.head) + "</div>" +
+      (q.context ? '<div class="question-context">' + esc(q.context) + "</div>" : "") +
       '<div class="q-text">' + esc(q.q) + "</div>" +
       (q.code ? '<pre class="code-block q-code">' + esc(q.code) + "</pre>" : "") +
       '<div class="opt-list">' + optHtml + "</div>" +
@@ -1355,6 +1397,7 @@
       miniHead(cur.li) +
       qiMeterHTML() +
       '<div class="quiz-head">' + esc(info.head) + " · 补全法诀</div>" +
+      (q.context ? '<div class="question-context">' + esc(q.context) + "</div>" : "") +
       '<div class="q-text">' + esc(q.q) + "</div>" +
       '<div id="fillZone" class="fill-zone">' +
       '<pre class="code-block fill-code">' + fillCodeView(q) + "</pre>" +

@@ -1069,6 +1069,42 @@ html[data-scene="6"] .env-rain {
   gap: 18px;
 }
 
+/* 第二卷见闻段：以地点笺头把连续事件从“题目过场”里分离出来。 */
+.quest-scene {
+  padding-top: 2px;
+}
+
+.quest-scene-head {
+  margin: 0 0 22px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid rgba(200, 164, 75, 0.28);
+}
+
+.quest-scene-place {
+  color: rgba(221, 194, 125, 0.72);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+}
+
+.quest-scene-title {
+  margin: 7px 0 0;
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+}
+
+.quest-scene-lines {
+  gap: 13px;
+}
+
+.quest-scene-lines .dialog-item {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
 .dialog-item {
   border-left: 1px solid var(--line-gold);
   padding: 2px 0 2px 18px;
@@ -1231,6 +1267,16 @@ html[data-scene="6"] .env-rain {
   font-size: 17px;
   line-height: 1.9;
   margin-bottom: 14px;
+}
+
+.question-context {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-left: 2px solid rgba(200, 164, 75, 0.50);
+  background: rgba(200, 164, 75, 0.06);
+  color: var(--paper-dim);
+  font-size: 14px;
+  line-height: 1.9;
 }
 
 .q-code {

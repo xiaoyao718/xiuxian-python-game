@@ -567,6 +567,15 @@
     // quest 内 {q:n} 索引
     if (Array.isArray(lv.quest)) {
       lv.quest.forEach(function (it, k) {
+        if (it && typeof it === "object" && it.scene !== undefined) {
+          var scene = it.scene;
+          if (!scene || typeof scene !== "object" || !Array.isArray(scene.lines) || !scene.lines.length) {
+            bad(id + ".quest[" + k + "].scene", "见闻段应包含至少一条 lines");
+          } else {
+            ok(id + ".quest[" + k + "].scene", "见闻段 " + scene.lines.length + " 条叙事");
+          }
+          return;
+        }
         if (!it || typeof it !== "object" || it.q === undefined) {
           ok(id + ".quest[" + k + "]", "剧情项（无题目索引）");
           return;
