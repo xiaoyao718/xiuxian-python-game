@@ -910,6 +910,9 @@
     if (D.levels[cur.li].kind === "boss") {
       cur.phase = "boss";
       paintBoss();
+    } else if (D.levels[cur.li].lesson && D.levels[cur.li].lesson.deferred && D.levels[cur.li].quest && D.levels[cur.li].quest.length) {
+      // 长篇叙事章把讲解嵌回事件节点：先发生事，再在真正需要时读仙典札记。
+      enterQuest();
     } else {
       cur.phase = "lesson";
       paintLesson();
@@ -1053,6 +1056,10 @@
       paintQuestQuestion(lv.questions[item.q], qi);
       return;
     }
+    if (item.lesson) {
+      paintQuestLesson(item.lesson);
+      return;
+    }
 
     const hasMore = cur.questPos + 1 < items.length;
     const canSkip = allNarrativeSeen("quest", items);
@@ -1073,6 +1080,25 @@
     syncImmersiveMode();
     finishStage();
     startTypewriter(stageBox);
+    markNarrativeSeen("quest", cur.questPos);
+  }
+
+  function paintQuestLesson(note) {
+    const title = note.title || "仙典札记";
+    const points = Array.isArray(note.points) ? note.points : [];
+    const example = note.example || null;
+    stageBox.innerHTML =
+      '<div class="card story-lesson-card">' +
+      miniHead(cur.li) +
+      '<div class="story-lesson-kicker">仙典 · 此刻所需</div>' +
+      '<h3 class="lesson-name">' + esc(title) + "</h3>" +
+      '<p class="lesson-intro">' + esc(note.intro || "") + "</p>" +
+      (points.length ? '<ol class="lesson-points">' + points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ol>" : "") +
+      (example ? '<div class="code-wrap"><div class="code-head"><span>眼前所用的写法</span></div><pre class="code-block">' + esc(example.code || "") + "</pre></div>" : "") +
+      '<div class="btn-row"><button class="btn ghost small" onclick="App.backStory()" type="button">回看开篇</button><button class="btn primary" onclick="App.questContinue()" type="button">继续行动 ▸</button></div>' +
+      "</div>";
+    syncImmersiveMode();
+    finishStage();
     markNarrativeSeen("quest", cur.questPos);
   }
 

@@ -2060,4 +2060,20 @@ window.GAME_DATA = {
     { who: "林慕", text: "我不想只带着一页任务簿去赌。云水城、旧渡口、北辰宗……每一条都要留在手边。" }
   );
   e.outro.push({ who: "旁白", text: "船离岸时，岸上的北辰宗只剩一线灯火。林慕没有回头；名录里的空位仍在，但他已经知道下一次该如何把新的名字接进这条路。" });
+
+  // 第二卷不在开篇弹出完整课程，而是在剧情真正需要时给出最小可用的仙典札记。
+  const insertNote = function (lv, beforeQ, note) {
+    lv.lesson.deferred = true;
+    const at = lv.quest.findIndex(function (item) { return item && item.q === beforeQ; });
+    if (at >= 0) lv.quest.splice(at, 0, { lesson: note });
+  };
+  insertNote(a, 0, { title: "认位 · 先看第一个字", intro: "风会吹走纸，位置不会。先用索引读出你要留下的字。", points: ["字符串第一个位置是 0。", "word[0] 取出第一个字符。"], example: { code: 'word = "云海"\nprint(word[0])' } });
+  insertNote(a, 1, { title: "量页 · 先知边界", intro: "交册前，先知道短讯究竟还剩几字。", points: ["len(word) 返回字符串的长度。", "长度之外不能再用索引取字。"], example: { code: 'word = "云海"\nprint(len(word))' } });
+  insertNote(b, 0, { title: "裁笺 · 留下中间的路", intro: "年号不必抄进名录，只取真正的地名。", points: ["text[a:b] 从 a 取到 b 之前。", "结束位置本身不包含在结果里。"], example: { code: 'place = "甲云水城乙"\nprint(place[1:4])' } });
+  insertNote(b, 2, { title: "裁笺 · 从此处往后", intro: "当开头都无关紧要时，可以从指定位置一直取到结尾。", points: ["text[a:] 从索引 a 取到最后。"], example: { code: 'msg = "旧简：云海来信"\nprint(msg[3:])' } });
+  insertNote(c, 0, { title: "拂尘 · 先让票面清楚", intro: "露水只沾在首尾，先拂去它，再核对行程。", points: ["text.strip() 去掉首尾空白。"], example: { code: 'ticket = "  旧渡口  "\nprint(ticket.strip())' } });
+  insertNote(c, 1, { title: "校字 · 不替伪票背书", intro: "发现一个显眼错字时，先还原文字，再决定是否登船。", points: ["replace(旧, 新) 返回替换后的字符串。", "find(内容) 返回内容首次出现的位置。"], example: { code: 'print("新渡口".replace("新", "旧"))' } });
+  insertNote(d, 0, { title: "合符 · 出发前的三步", intro: "这一次没有新法诀。先清理，再截取，最后确认终点。", points: ["strip() 清理首尾杂痕。", "切片取出路线中段。", "find() 确认终点仍在密令里。"], example: { code: 'clean = msg.strip()\nprint(clean[3:5])' } });
+  insertNote(e, 0, { title: "收卷 · 让线索同行", intro: "船入雾前，把地点按先后收进同一卷名录。", points: ["方括号 [] 创建列表。", "列表会按顺序保存多个元素。"], example: { code: 'clues = ["云水城", "旧渡口"]' } });
+  insertNote(e, 2, { title: "续卷 · 让新线索归位", intro: "新的名字出现时，把它接在旧名录之后，再数清手中已有多少。", points: ["append() 在列表末尾添加元素。", "len() 返回列表中的元素数量。"], example: { code: 'clues.append("北辰宗")\nprint(len(clues))' } });
 })(window.GAME_DATA);
