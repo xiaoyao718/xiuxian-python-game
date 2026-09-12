@@ -750,7 +750,13 @@ window.GAME_DATA = {
         { who: "仙典", text: "先学会从杂讯里取出所需，才不会被一整页文字带着走。下一章，便要让文字自己显出端倪。" },
         { who: "林慕", text: "旧渡口……三年前那场秘境任务，正是从那里出发。" }
       ]
-    }
+    },
+    { id:"v2_lv3", volumeId:"v2", scene:8, kind:"lesson", chapter:"第三章", title:"灵笺辨伪", stageLabel:"筑基·初成", tagline:"除去杂痕，伪讯自然露出破绽。",
+      story:[{who:"旁白",text:"旧渡口的传讯被人故意沾上空白与错字，林慕必须先辨出真意。"},{who:"仙典",text:"strip() 可去除首尾空白，replace() 可替换文字，find() 能找出一段文字首次出现的位置。"}],
+      lesson:{name:"辨伪 · 字符串常用方法",intro:"字符串方法能清理、替换和查找文字。",points:["text.strip() 去掉首尾空白。","text.replace(旧, 新) 返回替换后的新字符串。","text.find(内容) 返回首次位置；找不到时返回 -1。"],example:{code:'msg = "  云海暗号  "\nprint(msg.strip())\nprint("旧渡口".find("渡"))',output:"云海暗号\n1"}},
+      quest:[{who:"旁白",text:"第一张伪讯首尾沾满空白。"},{q:0},{who:"旁白",text:"第二张把旧渡口写成了新渡口。"},{q:1},{who:"旁白",text:"最后，林慕要确认讯中是否藏有“暗号”。"},{q:2}],
+      questions:[{q:'msg = "  云海  "。想得到“云海”，应使用？',options:["msg.strip()","msg.find()","msg.replace()","len(msg)"],answer:0,hint:"首尾空白要清理。",explain:"strip() 去掉字符串首尾空白。",cheer:"杂痕褪去，字迹归正。"},{q:'"旧渡口".replace("旧", "新") 的结果是？',options:["旧渡口","新渡口","渡口","报错"],answer:1,hint:"replace 会返回替换后的新字符串。",explain:"旧 被替换为 新。",cheer:"一字改动，伪讯现形。"},{q:'"云海暗号".find("暗号") 的结果是？',options:["2","-1","4","报错"],answer:0,hint:"云、海之后才是暗号。",explain:"暗号从索引 2 开始。",cheer:"暗号的位置已被锁定。"}],
+      quizExtra:[{q:"补全法诀，清理 msg 首尾空白：",kind:"fill",code:'msg = "  旧渡口  "\nprint(msg.__1__())',slots:[["strip","find","replace"]],answer:[0],hint:"去掉首尾空白。",explain:"strip() 返回清理后的字符串。",cheer:"真讯终于能被读清。"}],outro:[{who:"林慕",text:"伪造者留下的错字不多，却足够指向一个人。"},{who:"仙典",text:"能清理文字，也要能清理遮目的杂讯。"}] }
   ],
 
   // ============================================================
