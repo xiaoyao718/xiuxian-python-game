@@ -6,6 +6,9 @@
 > 在线试玩：https://xiaoyao718.github.io/xiuxian-python-game/
 > （GitHub Pages，每次推送后约 1 分钟自动生效）
 
+> 人物与局部特效验收小样：https://xiaoyao718.github.io/xiuxian-python-game/portrait-demo.html
+> （独立页面，不影响现有主线；可切换说话角色并触发一次灯簿墨迹反馈）
+
 一个面向 0 基础学习者的 Python 剧情闯关网页游戏：随主角林慕在仓绝大陆上，
 从 `print` 一路修到 `for`，最后亲手修正法诀渡过筑基天劫。学习内容与玩法闭环全部
 在浏览器内完成（运行 Python 需要联网加载 Skulpt；音效为 WebAudio 实时合成，

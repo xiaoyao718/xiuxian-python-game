@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>雾港灯簿 · 人物与特效小样</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css">
+  <style>
+    :root { --paper:#ece4d2; --mist:#b9c4bf; --gold:#d5b36e; --ink:#0a1013; --jade:#9dbdb3; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-width:320px; min-height:100vh; overflow:hidden; color:var(--paper); background:#0a1013; font-family:"LXGW WenKai", "Microsoft YaHei", sans-serif; }
+    .stage { position:relative; isolation:isolate; min-height:100vh; overflow:hidden; background:#111b20; }
+    .stage::before { content:""; position:absolute; inset:-2%; z-index:-3; background:url("assets/scenes/v2-mist-harbor-inn-dawn-v1.png") center 54% / cover no-repeat; filter:saturate(.65) brightness(.67) contrast(1.07); transform:scale(1.025); }
+    .stage::after { content:""; position:absolute; inset:0; z-index:-2; background:linear-gradient(90deg,rgba(4,9,12,.66) 0%,rgba(6,11,14,.30) 35%,rgba(5,9,11,.14) 59%,rgba(4,8,10,.65) 100%), linear-gradient(0deg,rgba(3,7,9,.80),transparent 54%); }
+    .demo-tag { position:absolute; top:28px; left:clamp(20px,4vw,58px); color:rgba(227,204,149,.72); font-size:11px; letter-spacing:.24em; z-index:5; }
+    .demo-tag b { color:var(--gold); font-weight:400; }
+    .portrait { position:absolute; z-index:1; bottom:-3vh; width:min(43vw,590px); max-height:95vh; object-fit:contain; object-position:bottom center; pointer-events:none; opacity:.32; filter:saturate(.84) contrast(1.02) drop-shadow(0 18px 18px rgba(0,0,0,.34)); transition:opacity .42s ease, transform .52s cubic-bezier(.2,.8,.2,1), filter .42s ease; }
+    .portrait--linmu { left:-3vw; transform:translate3d(-3%, 3%, 0) scale(.94); }
+    .portrait--keeper { right:-4vw; transform:translate3d(4%, 4%, 0) scale(.93); }
+    .stage[data-speaker="linmu"] .portrait--linmu, .stage[data-speaker="keeper"] .portrait--keeper { opacity:.97; filter:saturate(.98) contrast(1.03) drop-shadow(0 24px 22px rgba(0,0,0,.42)); transform:translate3d(0,0,0) scale(1); }
+    .stage[data-speaker="linmu"] .portrait--keeper, .stage[data-speaker="keeper"] .portrait--linmu { filter:grayscale(.16) saturate(.55) brightness(.72); }
+    .main { position:relative; z-index:3; width:min(720px,calc(100vw - 40px)); margin:0 auto; min-height:100vh; display:flex; flex-direction:column; justify-content:flex-end; padding:110px 0 clamp(34px,6vh,70px); }
+    .place { color:rgba(225,200,136,.75); letter-spacing:.18em; font-size:11px; margin:0 0 12px 18px; }
+    .dialogue { position:relative; padding:clamp(22px,3vw,36px) clamp(24px,4vw,48px) 26px; border:1px solid rgba(215,180,107,.34); border-left:2px solid rgba(215,180,107,.70); background:rgba(10,15,17,.51); -webkit-backdrop-filter:blur(7px) saturate(1.04); backdrop-filter:blur(7px) saturate(1.04); box-shadow:0 18px 60px rgba(0,0,0,.24); }
+    .dialogue::before { content:""; position:absolute; left:18px; right:18px; top:0; height:1px; background:linear-gradient(90deg,transparent,rgba(231,208,147,.46),transparent); }
+    .name { display:flex; align-items:center; gap:10px; margin:0 0 14px; color:var(--gold); font-size:15px; letter-spacing:.16em; }
+    .seal { display:grid; place-items:center; width:25px; height:25px; border:1px solid rgba(205,84,66,.7); background:rgba(143,47,36,.78); color:#f6dfca; font-size:12px; transform:rotate(-4deg); }
+    .line { margin:0; min-height:4.4em; color:rgba(242,235,218,.94); font-size:clamp(17px,2vw,21px); line-height:2.05; letter-spacing:.035em; text-shadow:0 1px 10px rgba(0,0,0,.3); }
+    .ledger { position:relative; margin:17px 0 0; padding:12px 15px 11px; overflow:hidden; border-top:1px solid rgba(194,178,136,.23); color:rgba(202,216,205,.82); font-size:13px; letter-spacing:.09em; line-height:1.8; }
+    .ledger span { color:var(--jade); }
+    .ink { position:absolute; inset:0; opacity:0; background:radial-gradient(ellipse 17% 150% at 18% 50%, rgba(34,82,72,.62),transparent 72%), linear-gradient(90deg,transparent 8%,rgba(148,180,155,.42) 18%,rgba(200,177,108,.45) 40%,transparent 78%); transform:translateX(-80%) skewX(-18deg); pointer-events:none; }
+    .stage.is-checked .ink { animation:ledgerInk 1.15s cubic-bezier(.2,.8,.2,1) both; }
+    .checked-note { position:absolute; right:16px; bottom:9px; color:rgba(230,200,121,0); font-size:11px; letter-spacing:.18em; transition:color .35s ease .72s; }
+    .stage.is-checked .checked-note { color:rgba(230,200,121,.92); }
+    .actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:18px 0 0; }
+    button { font:inherit; cursor:pointer; }
+    .switch { border:0; padding:9px 3px; color:rgba(226,215,191,.76); background:transparent; font-size:13px; letter-spacing:.1em; }
+    .switch:hover { color:var(--paper); }
+    .check { padding:10px 18px; color:#21170b; border:1px solid rgba(241,214,143,.74); background:linear-gradient(135deg,#dfc076,#ae8240); font-size:13px; letter-spacing:.12em; box-shadow:0 6px 18px rgba(123,84,31,.22); }
+    .check:hover { filter:brightness(1.08); }
+    .note { margin-top:16px; color:rgba(207,198,179,.56); font-size:11px; line-height:1.7; letter-spacing:.08em; text-align:center; }
+    @keyframes ledgerInk { 0% { opacity:0; transform:translateX(-85%) skewX(-18deg); } 38% { opacity:.85; } 100% { opacity:.22; transform:translateX(88%) skewX(-18deg); } }
+    @media (max-width:760px) { .portrait { width:64vw; max-height:62vh; bottom:22vh; opacity:.18; } .portrait--linmu{left:-18vw}.portrait--keeper{right:-20vw}.main{padding-bottom:26px}.demo-tag{top:20px}.place{margin-left:5px}.line{min-height:5.7em}.dialogue{padding:22px 22px 20px}.actions{margin-top:10px} }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+  </style>
+</head>
+<body>
+  <main class="stage" id="stage" data-speaker="linmu">
+    <div class="demo-tag"><b>人物 × 局部特效</b> ／ 第二卷 · 雾港灯簿</div>
+    <img class="portrait portrait--linmu" src="assets/demo/portrait-demo-linmu-v1.png" alt="林慕半身立绘">
+    <img class="portrait portrait--keeper" src="assets/demo/portrait-demo-innkeeper-v1.png" alt="雾港掌柜半身立绘">
+    <section class="main" aria-live="polite">
+      <div class="place" id="place">雾港客栈 · 临河廊下</div>
+      <article class="dialogue">
+        <p class="name"><span class="seal" id="seal">慕</span><span id="name">林慕</span></p>
+        <p class="line" id="line">灯簿怎么排，我就怎么读。若有人曾在这里停过，总该留下他自己的那一行。</p>
+        <div class="ledger"><span>昨夜灯簿：</span>东厢　后院　河埠　二楼 <i class="ink"></i><b class="checked-note">已逐项核对</b></div>
+      </article>
+      <div class="actions">
+        <button class="switch" id="switch" type="button">切换掌柜说话</button>
+        <button class="check" id="check" type="button">核对灯簿</button>
+      </div>
+      <p class="note">小样只验证立绘融入与局部反馈；不加入持续粒子、强闪光或鼠标跟随。</p>
+    </section>
+  </main>
+  <script>
+    const stage = document.getElementById('stage');
+    const content = {
+      linmu: { name:'林慕', seal:'慕', button:'切换掌柜说话', line:'灯簿怎么排，我就怎么读。若有人曾在这里停过，总该留下他自己的那一行。' },
+      keeper: { name:'雾港掌柜', seal:'掌', button:'切换林慕说话', line:'肯把一本普通灯簿逐页读完的人，才配听旧人的故事。河埠那一行，你没有漏掉。' }
+    };
+    document.getElementById('switch').addEventListener('click', function () {
+      const next = stage.dataset.speaker === 'linmu' ? 'keeper' : 'linmu';
+      stage.dataset.speaker = next;
+      document.getElementById('name').textContent = content[next].name;
+      document.getElementById('seal').textContent = content[next].seal;
+      document.getElementById('line').textContent = content[next].line;
+      this.textContent = content[next].button;
+    });
+    document.getElementById('check').addEventListener('click', function () {
+      stage.classList.remove('is-checked');
+      void stage.offsetWidth;
+      stage.classList.add('is-checked');
+      this.textContent = '灯簿已核对';
+    });
+  </script>
+</body>
+</html>
