@@ -5833,6 +5833,20 @@ html[data-scene="11"] .env-art {
   --m-far-a: rgba(84, 112, 93, 0.18); --m-far-b: rgba(12, 24, 16, 0.56); --cloud-a: rgba(155, 173, 152, 0.07); --cloud-b: rgba(184, 161, 105, 0.04); --cloud-c: rgba(84, 118, 96, 0.04); --beam-a: rgba(207, 178, 113, 0.05); --beam-b: rgba(220, 207, 170, 0.02); --beam-c: rgba(93, 128, 103, 0.02); --beam-o: 0.24;
 }
 
+/* 第二卷第六章 · 雾港客栈：新地点以静态河雾与灯火承接夜航，不叠加粒子或网页式天气特效。 */
+html[data-scene="12"] .env-art {
+  background-image: url("../assets/scenes/v2-mist-harbor-inn-dawn-v1.png");
+  background-position: center 54%;
+  opacity: 0.68;
+  filter: saturate(0.56) brightness(0.62) contrast(1.07);
+}
+
+:root[data-scene="12"] {
+  --scene-sky: radial-gradient(86% 62% at 76% 12%, rgba(214, 183, 115, 0.10), transparent 60%), linear-gradient(170deg, #26333a 0%, #111b20 58%, #070c10 100%);
+  --fog-a: rgba(148, 168, 174, 0.16); --fog-b: rgba(175, 151, 105, 0.07); --light: rgba(221, 175, 100, 0.08);
+  --m-far-a: rgba(111, 135, 142, 0.18); --m-far-b: rgba(13, 26, 31, 0.56); --cloud-a: rgba(182, 201, 203, 0.09); --cloud-b: rgba(195, 178, 143, 0.04); --cloud-c: rgba(104, 137, 142, 0.05); --beam-a: rgba(220, 194, 134, 0.05); --beam-b: rgba(216, 230, 224, 0.025); --beam-c: rgba(101, 137, 145, 0.03); --beam-o: 0.24;
+}
+
 .map-volume {
   position: absolute;
   left: 42px;

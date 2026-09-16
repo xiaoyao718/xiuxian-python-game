@@ -11,7 +11,7 @@
   const LS_KEY_V1 = "xiuxian-python-game-v1";
   const LABEL = ["甲", "乙", "丙", "丁"];
   // 山河路线图：节点序数（终章用“劫”）
-  const MAP_SEAL = ["一", "二", "三", "四", "五", "劫", "字"];
+  const MAP_SEAL = ["一", "二", "三", "四", "五", "劫", "字", "裁", "辨", "渡", "录", "巡"];
   const reducedMotion =
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // 打字机速度：字/秒（约 40–60，可按需调高 TYPE_CPS）
