@@ -722,18 +722,29 @@
     return { role: "npc", seal: first };
   }
 
-  // 立绘槽位（i2-4 E 项）：
-  //  - 非旁白说话人左侧加 .portrait-slot；当前以「墨色剪影圆盘 + 单字朱印」占位；
-  //  - 对接规范：未来插画放 assets/portraits/<who>.svg（512x512 透明底、墨金朱风格），
-  //    引擎会自动 <img> 加载并盖在占位印上方，无需改渲染逻辑；
-  //  - 插画缺失时 img 的 onerror 自行移除，占位印照常显示，无布局抖动。
+  // 第一卷立绘按章节状态取图：林慕每章换一套对应修为与场景的衣装；
+  // 没有正式立绘的说话人不再显示通用剪影，避免“同一张脸换名字”。
+  const portraitsByLevel = {
+    lv1: { "林慕": "linmu-lv1-v1.png", "林韬": "lintao-v1.png", "周显": "zhouxian-v1.png" },
+    lv2: { "林慕": "linmu-lv2-v1.png", "林韬": "lintao-v1.png" },
+    lv3: { "林慕": "linmu-lv3-v1.png", "周显": "zhouxian-v1.png", "章管事": "zhang-guanshi-v1.png" },
+    lv4: { "林慕": "linmu-lv4-v1.png", "周显": "zhouxian-v1.png" },
+    lv5: { "林慕": "linmu-lv5-v1.png", "林韬": "lintao-v1.png" },
+    boss: { "林慕": "linmu-boss-v1.png" }
+  };
+
+  function portraitSourceFor(who) {
+    const lv = D.levels[cur.li];
+    const file = lv && portraitsByLevel[lv.id] && portraitsByLevel[lv.id][who];
+    return file ? "assets/portraits/" + file : "";
+  }
+
   function portraitSlotHTML(who, seal) {
-    const src = "assets/portraits/" + String(who || "未知") + ".svg";
+    const src = portraitSourceFor(who);
+    if (!src) return "";
     return (
-      '<div class="portrait-slot">' +
-      '<img src="' + esc(src) + '" alt="" loading="lazy" ' +
-      'onerror="this.parentNode.removeChild(this)">' +
-      '<span class="portrait-seal">' + esc(seal) + "</span>" +
+      '<div class="portrait-slot" aria-hidden="true">' +
+      '<img src="' + esc(src) + '" alt="" loading="lazy" onerror="this.closest(\'.has-portrait\').classList.remove(\'has-portrait\');this.remove()">' +
       "</div>"
     );
   }
@@ -764,11 +775,13 @@
       '<div class="who-text type-text">' + text + "</div>" +
       "</div>";
     if (roleInfo.role === "narrator") return itemOpen;
-    // 非旁白：左侧立绘槽 + 对话主体（保留原 who-name/who-text 结构供打字机与样式使用）
+    const portrait = portraitSlotHTML(line.who, roleInfo.seal);
+    if (!portrait) return itemOpen;
+    // 有正式立绘的角色使用侧边半身像；仍保留原文字结构供打字机与样式使用。
     const body =
       '<div class="dialog-item has-portrait" data-who="' + name + '" data-role="' +
       roleInfo.role + '">' +
-      portraitSlotHTML(line.who, roleInfo.seal) +
+      portrait +
       '<div class="dialog-body">' +
       '<div class="who-name" data-seal="' + esc(roleInfo.seal) + '">' + name + "</div>" +
       '<div class="who-text type-text">' + text + "</div>" +

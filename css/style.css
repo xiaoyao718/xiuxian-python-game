@@ -4584,11 +4584,11 @@ body.is-bag-open #bagPanel {
   }
 }
 
-/* ---- E 立绘槽位（结构占位；未来 assets/portraits/<who>.svg 自动生效） ---- */
+/* ---- E 第一卷立绘：人物半身锚在对白侧，不制造全屏特效或持续飘动 ---- */
 .dialog-item.has-portrait {
   display: flex;
-  align-items: flex-start;
-  gap: 15px;
+  align-items: stretch;
+  gap: clamp(10px, 1.6vw, 18px);
 }
 
 .dialog-item.has-portrait .dialog-body {
@@ -4598,79 +4598,63 @@ body.is-bag-open #bagPanel {
 
 .portrait-slot {
   position: relative;
-  flex: 0 0 66px;
-  width: 66px;
-  height: 66px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 1px solid rgba(200, 164, 75, 0.3);
-  background: radial-gradient(circle at 36% 28%, rgba(233, 225, 204, 0.09), rgba(5, 4, 3, 0.8) 74%);
-  box-shadow:
-    inset 0 0 16px rgba(0, 0, 0, 0.55),
-    0 0 9px rgba(200, 164, 75, 0.09);
-  animation: portraitFloat 3.6s ease-in-out infinite alternate;
-  will-change: transform;
+  align-self: flex-end;
+  flex: 0 0 clamp(94px, 13vw, 156px);
+  width: clamp(94px, 13vw, 156px);
+  min-height: clamp(142px, 19vw, 224px);
+  overflow: visible;
+  pointer-events: none;
+  animation: portraitEnter 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .portrait-slot::after {
   content: "";
   position: absolute;
-  inset: 4px;
-  border-radius: 50%;
-  border: 1px solid rgba(200, 164, 75, 0.16);
+  left: 10%;
+  right: 10%;
+  bottom: 5px;
+  height: 20%;
+  border-bottom: 1px solid rgba(207, 179, 107, 0.26);
+  background: radial-gradient(ellipse at center, rgba(16, 20, 19, 0.36), transparent 70%);
   pointer-events: none;
 }
 
 .portrait-seal {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 26px;
-  color: rgba(240, 230, 210, 0.84);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
-  background:
-    radial-gradient(circle at 50% 44%, rgba(200, 164, 75, 0.12), transparent 62%);
+  display: none;
 }
 
 .portrait-slot img {
   position: absolute;
-  inset: 0;
+  inset: auto 50% 0 auto;
   z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 126%;
+  height: 118%;
+  max-width: none;
+  object-fit: contain;
+  object-position: center bottom;
+  transform: translateX(50%);
+  filter: saturate(0.87) contrast(1.02) drop-shadow(0 13px 10px rgba(0, 0, 0, 0.32));
 }
 
-@keyframes portraitFloat {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-3px);
-  }
+@keyframes portraitEnter {
+  from { opacity: 0; transform: translateX(-8px); filter: blur(2px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
 /* ---- 移动端：行囊面板 / 立绘 / 路线图微调 ---- */
 @media (max-width: 640px) {
   .dialog-item.has-portrait {
-    gap: 10px;
+    gap: 8px;
   }
 
   .portrait-slot {
-    flex-basis: 44px;
-    width: 44px;
-    height: 44px;
-  }
-
-  .portrait-seal {
-    font-size: 18px;
+    flex-basis: 74px;
+    width: 74px;
+    min-height: 118px;
   }
 
   .portrait-slot::after {
-    inset: 3px;
+    bottom: 3px;
   }
 
   .map-node {
