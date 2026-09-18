@@ -3311,6 +3311,67 @@ select:focus-visible,
   transform: rotate(-5deg);
 }
 
+/* ---- 成就印章册 ---- */
+.achievements-head {
+  border-bottom: 1px dashed var(--line-paper);
+  padding-bottom: 16px;
+  margin-bottom: 14px;
+}
+
+.achievements-eyebrow {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: var(--gold);
+}
+
+.achievements-sub,
+.achievements-progress {
+  margin-top: 8px;
+  color: var(--paper-dim);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.achievements-progress b { color: var(--gold); font-size: 18px; }
+
+.achievement-list { display: grid; gap: 10px; margin: 18px 0 22px; }
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 68px;
+  border: 1px solid rgba(233, 225, 204, 0.12);
+  border-radius: 4px;
+  padding: 10px 13px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.achievement-item.is-earned { border-color: rgba(200, 164, 75, 0.38); background: rgba(200, 164, 75, 0.07); }
+.achievement-item.is-locked { opacity: 0.55; }
+
+.achievement-seal {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 5px;
+  background: linear-gradient(150deg, #bd4938, #8f2f24);
+  color: #f3e6d0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 42px;
+  text-align: center;
+  transform: rotate(-4deg);
+}
+
+.achievement-item.is-locked .achievement-seal { background: rgba(233, 225, 204, 0.10); color: var(--paper-dim); }
+.achievement-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.achievement-copy strong { font-family: var(--font-display); color: var(--paper); letter-spacing: 1px; }
+.achievement-copy span { color: var(--paper-dim); font-size: 12px; line-height: 1.5; }
+.achievement-state { color: var(--gold); font-size: 12px; white-space: nowrap; }
+.achievement-item.is-locked .achievement-state { color: var(--paper-dim); }
+
 .mistake-chapter-name {
   font-family: var(--font-display);
   font-size: 18px;

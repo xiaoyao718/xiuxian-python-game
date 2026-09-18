@@ -194,6 +194,14 @@
 
   let state = loadState();
 
+  const ACHIEVEMENTS = [
+    { id: "first_step", glyph: "启", title: "落下第一笔", desc: "完成第一章·人人笑我" },
+    { id: "five_gates", glyph: "五", title: "五关连破", desc: "完成第一卷前五章" },
+    { id: "perfect_quiz", glyph: "净", title: "静室无尘", desc: "一次试炼三题全部答对" },
+    { id: "foundation", glyph: "筑", title: "问心筑基", desc: "完成终章·筑基问心" },
+    { id: "volume_complete", glyph: "卷", title: "一卷收束", desc: "完成第一卷全部六章" }
+  ];
+
   // 当前关卡会话状态
   let cur = {
     li: 0,
@@ -240,6 +248,25 @@
     } catch (e) {
       // 存储失败不阻断游玩
     }
+  }
+
+  function achievementUnlocked(id) {
+    return (state.achievements || []).indexOf(id) !== -1;
+  }
+
+  function unlockAchievement(id) {
+    if (achievementUnlocked(id)) return false;
+    state.achievements.push(id);
+    saveState();
+    sfx("seal");
+    refreshAchievementBadge();
+    return true;
+  }
+
+  function refreshAchievementBadge() {
+    const badge = document.getElementById("achievementCount");
+    if (badge) badge.textContent = state.achievements.length ? String(state.achievements.length) : "";
+    if (badge) badge.title = "已解锁 " + state.achievements.length + " / " + ACHIEVEMENTS.length + " 枚印章";
   }
 
   function narrativeKey(section, pos) {
@@ -1704,6 +1731,7 @@
     else if (ph === "outro") paintOutro();
     else if (ph === "clear") paintClear();
     else if (ph === "mistakes") paintMistakes();
+    else if (ph === "achievements") paintAchievements();
     else if (ph === "redo") paintCurrentQuestion();
     else paintStory();
   }
@@ -1714,9 +1742,47 @@
     paintMistakes();
   }
 
+  function openAchievements() {
+    snapshotCur();
+    closeSideDrawer();
+    paintAchievements();
+  }
+
   function closeMistakes() {
     restoreCur();
     repaintSavedView();
+  }
+
+  function closeAchievements() {
+    restoreCur();
+    repaintSavedView();
+  }
+
+  function paintAchievements() {
+    cur.phase = "achievements";
+    const unlocked = state.achievements || [];
+    const rows = ACHIEVEMENTS.map(function (item) {
+      const done = unlocked.indexOf(item.id) !== -1;
+      return (
+        '<div class="achievement-item ' + (done ? "is-earned" : "is-locked") + '">' +
+        '<div class="achievement-seal" aria-hidden="true">' + (done ? item.glyph : "·") + "</div>" +
+        '<div class="achievement-copy"><strong>' + esc(item.title) + "</strong>" +
+        '<span>' + esc(item.desc) + "</span></div>" +
+        '<span class="achievement-state">' + (done ? "已获得" : "待解锁") + "</span>" +
+        "</div>"
+      );
+    }).join("");
+    stageBox.innerHTML =
+      '<div class="card achievements-card">' +
+      '<div class="achievements-head"><div class="achievements-eyebrow">成就印章</div>' +
+      '<div class="achievements-sub">把走过的路，压成几枚看得见的印。</div></div>' +
+      '<div class="achievements-progress">已解锁 <b>' + unlocked.length + "</b> / " + ACHIEVEMENTS.length + " 枚</div>" +
+      '<div class="achievement-list">' + rows + "</div>" +
+      '<div class="btn-row"><button class="btn primary" onclick="App.closeAchievements()" type="button">收起印章册</button></div>' +
+      "</div>";
+    refreshAchievementBadge();
+    const curScene = Number(document.documentElement.getAttribute("data-scene") || 0);
+    finishStage(curScene);
   }
 
   function paintMistakes() {
@@ -1839,12 +1905,21 @@
     if (lv.kind === "boss") {
       state.boss = true;
     }
+    if (firstTime && lv.id === "lv1") unlockAchievement("first_step");
+    if (firstTime && ["lv1", "lv2", "lv3", "lv4", "lv5"].every(isDone)) {
+      unlockAchievement("five_gates");
+    }
+    if (lv.kind === "boss") unlockAchievement("foundation");
+    if (state.done.filter(function (id) {
+      return ["lv1", "lv2", "lv3", "lv4", "lv5", "boss"].indexOf(id) !== -1;
+    }).length === 6) unlockAchievement("volume_complete");
     saveState();
     // 通关点亮动画：仅本次新完成的连接段做金线流淌（i2-2）
     renderRoadmap(firstTime && !reducedMotion ? true : undefined);
     // i2-3：解锁灵宠/灵器；试炼零失误给主宠额外成长
     callApp("afterLevelDone", lv.id, firstTime);
     if (cur.phase === "quiz" && !cur.quizMistake) {
+      unlockAchievement("perfect_quiz");
       callApp("onQuizPerfect", lv.id);
     }
     breakthrough();
@@ -2522,6 +2597,8 @@
     passLevel: finishLevel,
     openMistakes: openMistakes,
     closeMistakes: closeMistakes,
+    openAchievements: openAchievements,
+    closeAchievements: closeAchievements,
     redoMistake: redoMistake,
     redoAnswer: redoAnswer,
     redoBack: redoBack,
@@ -2611,6 +2688,7 @@
   const sideToggle = document.getElementById("sideToggle");
   const sideMask = document.getElementById("sideMask");
   const btnMistakes = document.getElementById("btnMistakes");
+  const btnAchievements = document.getElementById("btnAchievements");
   if (sideToggle) {
     sideToggle.addEventListener("click", function () {
       setSideDrawer(!document.body.classList.contains("is-side-open"));
@@ -2620,6 +2698,7 @@
   const immersionToggle = document.getElementById("immersionToggle");
   if (immersionToggle) immersionToggle.addEventListener("click", toggleImmersiveNav);
   if (btnMistakes) btnMistakes.addEventListener("click", openMistakes);
+  if (btnAchievements) btnAchievements.addEventListener("click", openAchievements);
   document.addEventListener("keydown", onGlobalKey);
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") closeSideDrawer();
@@ -2627,6 +2706,7 @@
   // 灵尘粒子已迁移至 js/fx.js 的 Canvas 粒子层（i2-1）
   renderRoadmap();
   refreshMistakeBadge();
+  refreshAchievementBadge();
 
   const first = firstUndone();
   if (first === -1) {
